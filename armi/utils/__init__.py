@@ -52,55 +52,6 @@ _HASH_BUFFER_SIZE = 1024 * 1024
 SCIPAT_SPECIAL = re.compile(r"([+-]?\d*\.\d+)[eEdD]?([+-]\d+)")
 
 
-def coverageReportHelper(config, dataPaths):
-    """
-    Small utility function to generate coverage reports.
-
-    This was created to side-step the difficulties in submitting multi-line python
-    commands on-the-fly.
-
-    This combines data paths and then makes html and xml reports for the
-    fully-combined result.
-    """
-    from coverage import Coverage
-    import coverage
-
-    try:
-        cov = Coverage(config_file=config)
-        if dataPaths:
-            # fun fact: if you combine when there's only one file, it gets deleted.
-            cov.combine(data_paths=dataPaths)
-            cov.save()
-        else:
-            cov.load()
-        cov.html_report()
-        cov.xml_report()
-    except PermissionError:
-        # Albert has some issues with filename that start with a '.', such as the
-        # .coverage files. If a permissions error is raised, it likely has something to
-        # do with that. We changed the COVERAGE_RESULTS_FILE in cases.py for this reason.
-        #
-        # We print here, since this is used to run a one-off command, so runLog isn't
-        # really appropriate.
-        print(
-            "There was an issue in generating coverage reports. Probably related to "
-            "Albert hidden file issues."
-        )
-        # disabled until we figure out the problem.
-        # raise
-    except coverage.misc.CoverageException as e:
-        # This is happening when forming the unit test coverage report. This may be
-        # caused by the TestFixture coverage report gobbling up all of the coverage
-        # files before the UnitTests.cov_report task gets a chance to see them. It may
-        # simply be that we dont want a coverage report generated for the TestFixture.
-        # Something to think about. Either way, we do not want to fail the job just
-        # because of this
-        print(
-            "There was an issue generating coverage reports "
-            "({}):\n{}".format(type(e), e.args)
-        )
-
-
 def getFileSHA1Hash(filePath, digits=40):
     """
     Generate a SHA-1 hash of the input file.
