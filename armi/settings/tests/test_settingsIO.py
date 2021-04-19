@@ -18,10 +18,9 @@ import io
 import os
 import unittest
 
-import armi
 from armi.cli import entryPoint
 from armi.utils import directoryChangers
-from armi import settings
+from armi import CURRENT_MODE, Mode, settings
 from armi.settings import setting
 from armi.settings import settingsIO
 from armi.localization import exceptions
@@ -97,7 +96,7 @@ class SettingsWriterTests(unittest.TestCase):
     def setUp(self):
         self.td = directoryChangers.TemporaryDirectoryChanger()
         self.td.__enter__()
-        self.init_mode = armi.CURRENT_MODE
+        self.init_mode = CURRENT_MODE
         self.filepathXml = os.path.join(
             os.getcwd(), self._testMethodName + "test_setting_io.xml"
         )
@@ -108,7 +107,7 @@ class SettingsWriterTests(unittest.TestCase):
         self.cs["nCycles"] = 55
 
     def tearDown(self):
-        armi.Mode.setMode(self.init_mode)
+        Mode.setMode(self.init_mode)
         self.td.__exit__(None, None, None)
 
     def test_writeShorthand(self):

@@ -16,9 +16,9 @@ from scratch.
 
 """
 import matplotlib.pyplot as plt
-import armi
+from armi import configure
 
-armi.configure(permissive=True)
+configure(permissive=True)
 # pylint: disable=wrong-import-position
 from armi.reactor import blueprints
 from armi import settings

@@ -13,6 +13,7 @@ rather than relying upon input files.
 import numpy as np
 import matplotlib.pyplot as plt
 
+from armi import configure
 from armi import settings
 from armi import nuclideBases
 
@@ -34,9 +35,8 @@ from armi.reactor.components import DerivedShape
 from armi.materials import uZr
 from armi.materials import ht9
 from armi.materials import sodium
-import armi
 
-armi.configure(permissive=True)
+configure(permissive=True)
 
 
 def _addFlux(b):

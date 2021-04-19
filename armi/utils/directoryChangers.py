@@ -18,8 +18,8 @@ import shutil
 import string
 import glob
 
-import armi
 from armi import runLog
+from armi.context import getFastPath, MPI_SIZE
 from armi.utils import pathTools
 
 
@@ -193,7 +193,7 @@ class TemporaryDirectoryChanger(DirectoryChanger):
         DirectoryChanger.__init__(
             self, root, filesToMove, filesToRetrieve, dumpOnException
         )
-        root = root or armi.context.getFastPath()
+        root = root or getFastPath()
         if not os.path.exists(root):
             os.makedirs(root)
         self.initial = os.path.abspath(os.getcwd())
@@ -264,7 +264,7 @@ class ForcedCreationDirectoryChanger(DirectoryChanger):
 
 
 def directoryChangerFactory():
-    if armi.MPI_SIZE > 1:
+    if MPI_SIZE > 1:
         from .directoryChangersMpi import MpiDirectoryChanger
 
         return MpiDirectoryChanger

@@ -15,20 +15,18 @@
 """
 Tests for operators
 """
+# pylint: disable=abstract-method,no-self-use,unused-argument
 import os
 import unittest
 import subprocess
 
-import armi
-from armi import settings
+from armi import MPI_COMM, MPI_RANK, MPI_SIZE, settings
+from armi.interfaces import Interface
 from armi.operators import OperatorMPI
-
 from armi.tests import ARMI_RUN_PATH
 
 
-class FailingInterface1(
-    armi.interfaces.Interface
-):  # pylint: disable=abstract-method,no-self-use,unused-argument
+class FailingInterface1(Interface):
     """utility classes to make sure the logging system fails properly"""
 
     name = "failer"
@@ -37,9 +35,7 @@ class FailingInterface1(
         raise RuntimeError("Failing interface failure")
 
 
-class FailingInterface2(
-    armi.interfaces.Interface
-):  # pylint: disable=abstract-method,no-self-use,unused-argument
+class FailingInterface2(Interface):
     """utility class to make sure the logging system fails properly"""
 
     name = "failer"
@@ -48,9 +44,7 @@ class FailingInterface2(
         raise RuntimeError("Failing interface critical failure")
 
 
-class FailingInterface3(
-    armi.interfaces.Interface
-):  # pylint: disable=abstract-method,no-self-use,unused-argument
+class FailingInterface3(Interface):
     """fails on worker operate"""
 
     name = "failer"
@@ -59,7 +53,7 @@ class FailingInterface3(
         raise RuntimeError("Failing interface critical worker failure")
 
     def interactEveryNode(self, c, n):  # pylint:disable=unused-argument
-        armi.MPI_COMM.bcast("fail", root=0)
+        MPI_COMM.bcast("fail", root=0)
 
     def workerOperate(self, cmd):
         if cmd == "fail":
@@ -68,9 +62,7 @@ class FailingInterface3(
         return False
 
 
-class OperatorTests(
-    unittest.TestCase
-):  # pylint: disable=abstract-method,no-self-use,unused-argument
+class OperatorTests(unittest.TestCase):
     """Testing the MPI parallelization operation"""
 
     # @unittest.skipIf(distutils.spawn.find_executable('mpiexec.exe') is None, "mpiexec is not in path.")
@@ -90,7 +82,7 @@ class OperatorTests(
             subprocess.check_call(cmds, stdout=null, stderr=subprocess.STDOUT)
 
 
-if armi.MPI_SIZE > 1:
+if MPI_SIZE > 1:
 
     class MpiOperatorTests(unittest.TestCase):
         """Testing the MPI parallelization operation"""
@@ -104,7 +96,7 @@ if armi.MPI_SIZE > 1:
             self.o.removeAllInterfaces()
             failer = FailingInterface1(self.o.r, self.o.cs)
             self.o.addInterface(failer)
-            if armi.MPI_RANK == 0:
+            if MPI_RANK == 0:
                 self.assertRaises(RuntimeError, self.o.operate)
             else:
                 self.o.operate()
@@ -113,7 +105,7 @@ if armi.MPI_SIZE > 1:
             self.o.removeAllInterfaces()
             failer = FailingInterface2(self.o.r, self.o.cs)
             self.o.addInterface(failer)
-            if armi.MPI_RANK == 0:
+            if MPI_RANK == 0:
                 self.assertRaises(Exception, self.o.operate)
             else:
                 self.o.operate()
@@ -122,7 +114,7 @@ if armi.MPI_SIZE > 1:
             self.o.removeAllInterfaces()
             failer = FailingInterface3(self.o.r, self.o.cs)
             self.o.addInterface(failer)
-            if armi.MPI_RANK != 0:
+            if MPI_RANK != 0:
                 self.assertRaises(RuntimeError, self.o.operate)
             else:
                 self.o.operate()

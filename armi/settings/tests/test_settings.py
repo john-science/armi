@@ -22,13 +22,11 @@ import os
 from ruamel.yaml import YAML
 import voluptuous as vol
 
-import armi
 from armi.physics.fuelCycle import FuelHandlerPlugin
-from armi import settings
 from armi.settings import caseSettings
 from armi.settings import setting
 from armi.operators import settingsValidation
-from armi import plugins
+from armi import _app, getPluginManagerOrFail, plugins, settings
 from armi.utils import directoryChangers
 from armi.reactor.flags import Flags
 
@@ -78,10 +76,10 @@ class TestSettings2(unittest.TestCase):
     def setUp(self):
         # We are going to be messing with the plugin manager, which is global ARMI
         # state, so we back it up and restore the original when we are done.
-        self._backupApp = copy.copy(armi._app)
+        self._backupApp = copy.copy(_app)
 
     def tearDown(self):
-        armi._app = self._backupApp
+        _app = self._backupApp
 
     def testSchemaChecksType(self):
         newSettings = FuelHandlerPlugin.defineSettings()
@@ -176,7 +174,7 @@ assemblyRotationAlgorithm: buReducingAssemblyRotatoin
         )
 
     def test_pluginSettings(self):
-        pm = armi.getPluginManagerOrFail()
+        pm = getPluginManagerOrFail()
         pm.register(DummyPlugin1)
         # We have a setting; this should be fine
         cs = caseSettings.Settings()

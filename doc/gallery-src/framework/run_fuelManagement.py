@@ -24,10 +24,9 @@ from armi.reactor.tests import test_reactors
 from armi.physics.fuelCycle import fuelHandlers
 
 from armi.utils import plotting
+from armi import configure
 
-import armi
-
-armi.configure(permissive=True)
+configure(permissive=True)
 
 o, reactor = test_reactors.loadTestReactor(inputFileName="refTestCartesian.yaml")
 

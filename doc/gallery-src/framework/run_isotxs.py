@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 from armi.physics.neutronics import energyGroups
 from armi.tests import ISOAA_PATH
 from armi.nuclearDataIO.cccc import isotxs
-import armi
+from armi import configure
 
-armi.configure(permissive=True)
+configure(permissive=True)
 
 gs = energyGroups.getGroupStructure("ANL33")
 lib = isotxs.readBinary(ISOAA_PATH)

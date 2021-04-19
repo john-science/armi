@@ -19,14 +19,11 @@ import subprocess
 import unittest
 
 import armi
-from armi import settings
-from armi import nuclearDataIO
-from armi import mpiActions
+from armi import mpiActions, MPI_COMM, nuclearDataIO, settings
 from armi.utils import iterables
 from armi.operators import OperatorMPI
 from armi.nucDirectory import nuclideBases
 from armi.mpiActions import DistributeStateAction
-
 from armi.tests import ARMI_RUN_PATH, ISOAA_PATH
 
 
@@ -102,17 +99,11 @@ if armi.MPI_SIZE > 1:
                 }
                 # remove values that are *expected to be* different...
                 for key in ["stationaryBlocks", "verbosity"]:
-                    # self.assertNotEqual(original.get(key, None),
-                    #                    current.get(key, None))
                     if key in original:
                         del original[key]
                     if key in current:
                         del current[key]
-                # for key in set(original.keys() + current.keys()):
-                #     self.assertEqual(original[key],
-                #                      current[key],
-                #                      'Values for key `{}\' are different {} != {}'
-                #                      .format(key, original[key], current[key]))
+
                 self.assertEqual(original, current)
 
         def test_distributeReactor(self):
@@ -140,14 +131,14 @@ if armi.MPI_SIZE > 1:
             actual = {nb.label: nb.mc2id for nb in self.o.r.core.lib.nuclides}
             if armi.MPI_RANK == 0:
                 self.assertEqual(original_reactor.lib, self.action.r.core.lib)
-                armi.MPI_COMM.bcast(actual)  # soon to become expected
+                MPI_COMM.bcast(actual)  # soon to become expected
             else:
                 self.assertIsNotNone(self.action.r.core.lib)
                 for nuclide in self.action.r.core.lib.nuclides:
                     self.assertEqual(
                         nuclideBases.byLabel[nuclide._base.label], nuclide._base
                     )
-                expected = armi.MPI_COMM.bcast(None)
+                expected = MPI_COMM.bcast(None)
                 self.assertEqual(expected, actual)
 
         def test_distributeInterfaces(self):
@@ -186,13 +177,12 @@ if armi.MPI_SIZE > 1:
                 self.assertEqual(original_lib, self.o.r.core.lib)
 
         def test_compileResults(self):
-
             action1 = BcastAction1()
-            armi.MPI_COMM.bcast(action1)
+            MPI_COMM.bcast(action1)
             results1 = action1.invoke(None, None, None)
 
             action2 = BcastAction2()
-            armi.MPI_COMM.bcast(action2)
+            MPI_COMM.bcast(action2)
             results2 = action2.invoke(None, None, None)
             self.assertEqual(results1, results2)
 

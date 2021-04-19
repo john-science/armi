@@ -32,10 +32,7 @@ import os
 
 import numpy
 
-import armi
-from armi import runLog
-from armi import nuclearDataIO
-from armi import settings
+from armi import getPluginManagerOrFail, nuclearDataIO, runLog, settings
 from armi.localization import exceptions
 from armi.reactor import assemblies
 from armi.reactor import assemblyLists
@@ -2244,7 +2241,6 @@ class Core(composites.Composite):
             The height (cm) of the lowest fuel in this core model.
 
         """
-
         lowestFuelHeightInCm = self[0].getHeight()
         fuelBottoms = []
         for a in self.getAssemblies(Flags.FUEL):
@@ -2323,4 +2319,4 @@ class Core(composites.Composite):
 
         self.p.maxAssemNum = self.getMaxParam("assemNum")
 
-        armi.getPluginManagerOrFail().hook.onProcessCoreLoading(core=self, cs=cs)
+        getPluginManagerOrFail().hook.onProcessCoreLoading(core=self, cs=cs)

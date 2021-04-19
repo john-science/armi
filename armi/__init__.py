@@ -170,7 +170,9 @@ def init(choice=None, fName=None, cs=None):
         raise
 
 
-def getDefaultPlugins() -> List[Type[plugins.ArmiPlugin]]:
+def getDefaultPlugins() -> List[
+    Type[plugins.ArmiPlugin]
+]:  # pylint: disable=import-outside-toplevel
     """
     Return a list containing the default set of ARMI Framework plugins.
 

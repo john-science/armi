@@ -36,7 +36,7 @@ from ruamel.yaml import YAML
 from armi import runLog
 from armi.settings import caseSettings
 from armi.physics.neutronics.const import CONF_CROSS_SECTION
-from armi.physics.neutronics.crossSectionSettings import *
+from armi.physics.neutronics.crossSectionSettings import *  # pylint: disable=unused-wildcard-import
 from armi.scripts.migration.base import SettingsMigration
 from armi.settings import settingsIO
 
