@@ -61,7 +61,7 @@ enforces a couple of constrains that can be very useful:
 In many scenarios, one wants to access specific assemblies or blocks from a core. There
 are a few ways to get the objects that you're interested in.
 
-    * The `r.core.childrenByLocator` dictionary maps
+    * The :py:meth:`r.core.childrenByLocator` dictionary maps
       :py:class:`armi.reactor.grids.IndexLocation` objects to whichever assembly is at
       that location. For example ::
 
@@ -72,7 +72,7 @@ are a few ways to get the objects that you're interested in.
 
           >>> b = a[k]
 
-    * `r.core.getAssemblies()` loops through all assemblies in the core for when you
+    * :py:meth:`r.core.getAssemblies()` loops through all assemblies in the core for when you
       need to do something to all assemblies.
 
 
@@ -149,7 +149,8 @@ operator supports restart/continuation of past runs from an arbitrary time step.
 The Snapshots Operator
 ----------------------
 
-Alternatively, OperatorSnapshots is designed to allow for additional analyses at
+Alternatively, :py:class:`OperatorSnapshots <armi.operators.OperatorSnapshots>`
+is designed to allow for additional analyses at
 specific time steps. It simply loops through all snapshots that have been requested via
 the Snapshot Request functionality (Lists -> Edit snapshot requests in the GUI). At each
 snapshot request, the state is loaded from a previous case, as determined by the
@@ -162,7 +163,7 @@ The Interface Stack
 -------------------
 *Interfaces* (:py:class:`armi.interfaces.Interface`) operate upon the Reactor Model to
 do analysis.  They're designed to allow expansion of the code in a natural and
-well-organized manner. Interfaces are useful to link external codes to ARMI as well for
+well-organized manner. Interfaces are useful to link external code to ARMI as well for
 adding new internal physics into the rest of the system. As a result, very many aspects
 of ARMI are contained within interfaces.
 

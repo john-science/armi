@@ -39,11 +39,8 @@ import collections
 import operator
 import time
 
-from six import StringIO
-
 from armi import context
 from armi.context import Mode
-from armi import meta
 
 
 # use ordereddict so we can get right order of options in GUI.
@@ -177,18 +174,17 @@ class Log:
 
     def _msgHasAlreadyBeenEmitted(self, label, msgType=""):
         """Return True if the count of the label is greater than 1."""
-        if msgType == "warning" or msgType == "critical":
+        if msgType in ("warning", "critical"):
             self._singleWarningMessageCounts[label] += 1
-            if (
-                self._singleWarningMessageCounts[label] > 1
-            ):  # short circuit because error has changed
+            if self._singleWarningMessageCounts[label] > 1:
+                # short circuit because error has changed
                 return True
         else:
             self._singleMessageCounts[label] += 1
-            if (
-                self._singleMessageCounts[label] > 1
-            ):  # short circuit because error has changed
+            if self._singleMessageCounts[label] > 1:
+                # short circuit because error has changed
                 return True
+
         return False
 
     def clearSingleWarnings(self):

@@ -135,6 +135,8 @@ whenever your application is used.
 
 Example: ::
 
+   >>> from myapp.pluginA import PluginA
+   >>> from myapp.pluginB import PluginB
    >>> class MyApp(armi.apps.App):
    ...     def __init__(self):
    ...         # Adopt the base Framework Plugins. After calling __init__(), they are in
@@ -142,9 +144,6 @@ Example: ::
    ...         armi.apps.App.__init__(self)
    ...
    ...         # Register our own plugins
-   ...         from myapp.pluginA import PluginA
-   ...         from myapp.pluginB import PluginB
-   ...
    ...         self._pm.register(PluginA)
    ...         self._pm.register(PluginB)
    ...
