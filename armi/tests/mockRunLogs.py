@@ -32,9 +32,9 @@ class BufferLog(runLog.PrintLog):
     def __init__(self, *args, **kwargs):
         runLog.PrintLog.__init__(self, *args, **kwargs)
         self.originalLog = None
-        outputStream = six.StringIO()
+        self._outputStream = ""
         errStream = six.StringIO()
-        self.setStreams(outputStream, errStream)
+        self.setErrStream(errStream)
         self.setVerbosity(0)
 
     def __enter__(self):
@@ -44,10 +44,38 @@ class BufferLog(runLog.PrintLog):
 
     def __exit__(self, exception_type, exception_value, traceback):
         runLog.LOG = self.originalLog
-        runLog.LOG.setStreams(runLog.LOG._outputStream, runLog.LOG._errStream)
+        runLog.LOG.setErrStream(runLog.LOG._errStream)
+
+    def standardLogMsg(self, msgType, msg, single=False, label=None):
+        """
+        Add formatting to a message and handle its singleness, if applicable.
+
+        This is a wrapper around logger.log() that does most of the work and is
+        used by all message passers (e.g. info, warning, etc.).
+        """
+        # the message label is only used to determine unique for single-print warnings
+        if label is None:
+            label = msg
+
+        # Skip writing the message if it is below the set verbosity
+        msgVerbosity, msgLabel = runLog._logLevels[
+            msgType
+        ]  # pylint: disable=protected-access
+        if msgVerbosity < self._verbosity:
+            return
+
+        # Skip writing the message if it is single-print warning
+        if single and self._msgHasAlreadyBeenEmitted(label, msgType):
+            return
+
+        # Do the actual logging, but add that custom indenting first
+        msg = (
+            runLog._logLevels[msgType][1] + self._cleanMsg(msg) + "\n"
+        )  # pylint: disable=protected-access
+        self._outputStream += msg
 
     def getStdoutValue(self):
-        return self._outputStream.getvalue()
+        return self._outputStream
 
     def getStderrValue(self):
         return self._errStream.getvalue()
