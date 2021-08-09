@@ -18,11 +18,11 @@ Module of utilities to help dealing with iterable objects in python
 import struct
 from itertools import tee, chain
 
-from builtins import object  # pylint: disable=redefined-builtin
+from numpy import nan
 from six.moves import filterfalse, map, xrange, filter
 
 
-def flatten(l):
+def flatten(lst):
     """Flattens an iterable of iterables by one level
 
     Examples
@@ -31,10 +31,10 @@ def flatten(l):
     [1,2,3,4,5,6,7,8,9,10]
 
     """
-    return [item for sublist in l for item in sublist]
+    return [item for sublist in lst for item in sublist]
 
 
-def chunk(l, n):
+def chunk(lst, n):
     r"""Returns a generator object that yields lenght-`n` chunks of `l`.
     The last chunk may have a length less than `n` if `n` doesn't divide
     `len(l)`.
@@ -45,8 +45,8 @@ def chunk(l, n):
      [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10]]
 
     """
-    for i in xrange(0, len(l), n):
-        yield l[i : i + n]
+    for i in xrange(0, len(lst), n):
+        yield lst[i : i + n]
 
 
 def split(a, n, padWith=()):
@@ -90,6 +90,65 @@ def split(a, n, padWith=()):
         a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] or padWith for i in xrange(n)
     ]
     return chunked
+
+
+def _flattenToShapes(element):
+    """Helper for `isJagged()`.
+
+    This is essentially just a flatten method for arbitrary-depth lists.
+    But the final layer will include numbers or N-dimensional arrays.
+
+    There is some helpfulness built-in here to sidestep subtly jagged arrays.
+    """
+    if isinstance(element, list):
+        if len(element) == 0:
+            yield nan
+        elif not hasattr(element[0], "__setitem__"):
+            # if the deepest elements are lists, we want to return their length
+            yield len(element)
+        else:
+            # the major flattening logic
+            len0 = len(element[0])
+            for item in element:
+                # ensure the mid-layer lists are of equal length
+                if item is None or len(item) != len0:
+                    yield nan
+                    break
+
+                # yield the length/shape of each sub-list
+                yield from _flattenToShapes(item)
+    elif isinstance(element, dict):
+        yield nan
+    else:
+        # yield the shape of the inner-most NumPy array
+        yield element.shape
+
+
+def isJagged(lst):
+    """Returns `True` if the input list-of-lists-of-lists-of arrays is jagged.
+
+    This function assumes you have an arbitrary-depth collection of lists,
+    where the innermost elements are numbers or NumPy arrays.
+
+    Examples
+    --------
+    >>> isJagged([[1,2,3], [1,2,3]])
+    False
+    >>> isJagged([[1,2,3], [1,2,3,4]])
+    True
+    """
+    if len(lst) == 0:
+        return True
+
+    shapes = _flattenToShapes(lst)
+    ref = shapes.__next__()
+    for shape in shapes:
+        if shape == ref:
+            # this check allows for np.nan shapes to fail the test
+            continue
+        return True
+
+    return False
 
 
 # -------------------------------

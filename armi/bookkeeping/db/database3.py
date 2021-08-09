@@ -101,6 +101,7 @@ from armi.reactor import grids
 from armi.bookkeeping.db.typedefs import History, Histories, LocationHistories
 from armi.bookkeeping.db import database
 from armi.reactor import systemLayoutInput
+from armi.utils.iterables import isJagged
 from armi.utils.textProcessors import resolveMarkupInclusions
 from armi.nucDirectory import nuclideBases
 from armi.settings.fwSettings.databaseSettings import CONF_SYNC_AFTER_WRITE
@@ -1154,7 +1155,11 @@ class Database3(database.Database):
                         linkedDims.append("")
                         data.append(val)
 
-                data = numpy.array(data)
+                if isJagged(data):
+                    data = numpy.array(data, dtype=object)
+                else:
+                    data = numpy.array(data)
+
                 if any(linkedDims):
                     attrs["linkedDims"] = numpy.array(linkedDims).astype("S")
             else:
@@ -1172,7 +1177,10 @@ class Database3(database.Database):
                     attrs[_SERIALIZER_NAME] = paramDef.serializer.__name__
                     attrs[_SERIALIZER_VERSION] = paramDef.serializer.version
                 else:
-                    data = numpy.array(temp)
+                    if isJagged(temp):
+                        data = numpy.array(temp, dtype=object)
+                    else:
+                        data = numpy.array(temp)
                     del temp
 
             # Convert Unicode to byte-string
@@ -2365,7 +2373,6 @@ def packSpecialData(
     unpackSpecialData
 
     """
-
     # Check to make sure that we even need to do this. If the numpy data type is
     # not "O", chances are we have nice, clean data.
     if data.dtype != "O":
@@ -2380,7 +2387,7 @@ def packSpecialData(
     # gives a single True/False value
     nones = numpy.where([d is None for d in data])[0]
 
-    if len(nones) == data.shape[0]:
+    if len(nones) == data.shape[0] or 0 in data.shape:
         # Everything is None, so why bother?
         return None, attrs
 
@@ -2405,14 +2412,16 @@ def packSpecialData(
         # for most keys.
         attrs["dict"] = True
         keys = sorted({k for d in data for k in d})
-        data = numpy.array([[d.get(k, numpy.nan) for k in keys] for d in data])
-        if data.dtype == "O":
+
+        raw = [[d.get(k, numpy.nan) for k in keys] for d in data]
+        if isJagged(raw):
             # The data themselves are nasty. We could support this, but best to wait for
             # a credible use case.
             raise TypeError(
                 "Unable to coerce dictionary data into usable numpy array for "
                 "{}".format(paramName)
             )
+        data = numpy.array(raw)
         attrs["keys"] = numpy.array(keys).astype("S")
 
         return data, attrs
@@ -2431,11 +2440,11 @@ def packSpecialData(
     candidate = next((d for d in data if d is not None))
     shape = candidate.shape
     ndim = candidate.ndim
-    isJagged = (
-        not all(d.shape == shape for d in data if d is not None) or candidate.size == 0
+    isJaggedData = candidate.size == 0 or not all(
+        d.shape == shape for d in data if d is not None
     )
 
-    if isJagged:
+    if isJaggedData:
         assert all(
             val.ndim == ndim for val in data if val is not None
         ), "Inconsistent dimensions in jagged array for: {}\nDimensions: {}".format(
@@ -2458,7 +2467,6 @@ def packSpecialData(
         )
 
         data = numpy.delete(data, nones)
-
         data = numpy.concatenate(data, axis=None)
 
         attrs["offsets"] = offsets
@@ -2502,7 +2510,6 @@ def unpackSpecialData(data: numpy.ndarray, attrs, paramName: str) -> numpy.ndarr
     numpy.ndarray
         An ndarray containing the closest possible representation of the data that was
         originally written to the database.
-
 
     See Also
     --------

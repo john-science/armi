@@ -46,6 +46,7 @@ from armi import runLog
 from armi import utils
 from armi.utils import units
 from armi.utils import densityTools
+from armi.utils.iterables import isJagged
 from armi.nucDirectory import nucDir, nuclideBases
 from armi.nucDirectory import elements
 from armi.reactor import grids
@@ -90,9 +91,10 @@ class FlagSerializer(parameters.Serializer):
         functionality without having to do unholy things to ARMI's actual set of
         ``reactor.flags.Flags``.
         """
-        npa = numpy.array(
-            [b for f in data for b in f.to_bytes()], dtype=numpy.uint8
-        ).reshape((len(data), flagCls.width()))
+        raw = [b for f in data for b in f.to_bytes()]
+        theType = object if isJagged(raw) else numpy.uint8
+
+        npa = numpy.array(raw, dtype=theType).reshape((len(data), flagCls.width()))
 
         return npa, {"flag_order": flagCls.sortedFields()}
 

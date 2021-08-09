@@ -13,17 +13,21 @@
 # limitations under the License.
 
 """
-
-
 unittests for iterables.py
 """
 import time
 import unittest
+import numpy as np
 
 from armi.utils import iterables
 
+# CONSTANTS
+_TEST_DATA = {"turtle": [float(vv) for vv in range(-2000, 2000)]}
+
 
 class TestIterables(unittest.TestCase):
+    """Testing our custom Iterables"""
+
     def test_flatten(self):
         self.assertEqual(
             iterables.flatten([[1, 2, 3], [4, 5, 6], [7, 8], [9, 10]]),
@@ -65,23 +69,118 @@ class TestIterables(unittest.TestCase):
         unchu = iterables.flatten(chu)
         self.assertEqual(unchu, data)
 
-    testData = {"turtle": [float(vv) for vv in range(-2000, 2000)]}
-
     def test_packingAndUnpackingBinaryStrings(self):
         start = time.perf_counter()
-        packed = iterables.packBinaryStrings(self.testData)
+        packed = iterables.packBinaryStrings(_TEST_DATA)
         unpacked = iterables.unpackBinaryStrings(packed["turtle"][0])
         timeDelta = time.perf_counter() - start
-        self.assertEqual(self.testData["turtle"], unpacked)
+        self.assertEqual(_TEST_DATA["turtle"], unpacked)
         return timeDelta
 
     def test_packingAndUnpackingHexStrings(self):
         start = time.perf_counter()
-        packed = iterables.packHexStrings(self.testData)
+        packed = iterables.packHexStrings(_TEST_DATA)
         unpacked = iterables.unpackHexStrings(packed["turtle"][0])
         timeDelta = time.perf_counter() - start
-        self.assertEqual(self.testData["turtle"], unpacked)
+        self.assertEqual(_TEST_DATA["turtle"], unpacked)
         return timeDelta
+
+    def test_isJagged(self):
+        rawListGood = [[1, 2, 3], [1, 2, 3], [1, 2, 3]]
+        self.assertFalse(iterables.isJagged(rawListGood))
+        rawListBad = [[1, 2, 3], [1, 2, 3], [1, 2, 3, 4]]
+        self.assertTrue(iterables.isJagged(rawListBad))
+
+        raw3dGood = [[[1], [2], [3]], [[1], [2], [3]], [[1], [2], [3]]]
+        self.assertFalse(iterables.isJagged(raw3dGood))
+        raw3dBad = [[[1], [2], [3]], [[1], [2], [3]], [[1], [2], [3, 4]]]
+        self.assertTrue(iterables.isJagged(raw3dBad))
+
+        arrayListGood = [np.array([1, 2, 3]), np.array([1, 2, 3]), np.array([1, 2, 3])]
+        self.assertFalse(iterables.isJagged(arrayListGood))
+        arrayListBad = [
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3, 4]),
+        ]
+        self.assertTrue(iterables.isJagged(arrayListBad))
+
+        array2dListGood = [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))]
+        self.assertFalse(iterables.isJagged(array2dListGood))
+        array2dListBad = [np.zeros((3, 5)), np.ones((3, 6)), np.zeros((3, 5))]
+        self.assertTrue(iterables.isJagged(array2dListBad))
+
+        array3dListGood = [
+            [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+            [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+        ]
+        self.assertFalse(iterables.isJagged(array3dListGood))
+        array3dListBad = [
+            [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+            [np.zeros((3, 5)), np.ones((3, 6)), np.zeros((3, 5))],
+        ]
+        self.assertTrue(iterables.isJagged(array3dListBad))
+
+        array4dListGood = [
+            [
+                [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+                [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+            ],
+            [
+                [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+                [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+            ],
+        ]
+        self.assertFalse(iterables.isJagged(array4dListGood))
+        array4dListBad = [
+            [
+                [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+                [np.zeros((3, 5)), np.ones((3, 6)), np.zeros((3, 5))],
+            ],
+            [
+                [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+                [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
+            ],
+        ]
+        self.assertTrue(iterables.isJagged(array4dListBad))
+
+        rawSubtleBad = [[[1], [2], [3]], [[1], [2], [3], [4]], [[1], [2], [3]]]
+        self.assertTrue(iterables.isJagged(rawSubtleBad))
+
+        stringsGood = [["1", "2"], ["1", "2"], ["1", "2"]]
+        self.assertFalse(iterables.isJagged(stringsGood))
+        stringsBad = [["1", "2"], ["1", "2"], ["1", "2", "3"]]
+        self.assertTrue(iterables.isJagged(stringsBad))
+
+    def test_sequence(self):
+        # sequentially using methods in the usual way
+        s = iterables.Sequence(range(1000000))
+        s.drop(lambda i: i % 2 == 0)
+        s.select(lambda i: i < 20)
+        s.transform(lambda i: i * 10)
+        result = tuple(s)
+        self.assertEqual(result, (10, 30, 50, 70, 90, 110, 130, 150, 170, 190))
+
+        # stringing together the methods in a more modern Python way
+        s = iterables.Sequence(range(1000000))
+        result = tuple(
+            s.drop(lambda i: i % 2 == 0)
+            .select(lambda i: i < 20)
+            .transform(lambda i: i * 10)
+        )
+        self.assertEqual(result, (10, 30, 50, 70, 90, 110, 130, 150, 170, 190))
+
+        # call tuple() after a couple methods
+        s = iterables.Sequence(range(1000000))
+        s.drop(lambda i: i % 2 == 0)
+        s.select(lambda i: i < 20)
+        result = tuple(s)
+        self.assertEqual(result, (1, 3, 5, 7, 9, 11, 13, 15, 17, 19))
+
+        # you can't just call tuple() a second time, there is no data left
+        s.transform(lambda i: i * 10)
+        result = tuple(s)
+        self.assertEqual(result, ())
 
 
 if __name__ == "__main__":
