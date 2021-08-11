@@ -50,7 +50,9 @@ from armi.settings.fwSettings.globalSettings import CONF_MATERIAL_NAMESPACE_ORDE
 from armi.nuclearDataIO import xsLibraries
 
 # init logger
-runLog = logging.getLogger(__name__)
+from armi.runLog import getLogger
+
+runLog = getLogger(__name__)
 
 
 class Reactor(composites.Composite):

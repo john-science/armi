@@ -30,8 +30,8 @@ You can interact with the logger in much the same way now by doing:
 
 .. code::
 
-    import logging
-    runLog = logging.getLogger('whatever')
+    from armi.runLog import getLogger
+    runLog = getLogger('whatever')
 
 """
 from __future__ import print_function
@@ -234,14 +234,14 @@ class _RunLog:
 
     def startLog(self, name):
         """Initialize the streams when parallel processing"""
-        self.logger = logging.getLogger(STDOUT_LOGGER_NAME + SEP + str(self._mpiRank))
+        self.logger = getLogger(STDOUT_LOGGER_NAME + SEP + str(self._mpiRank))
 
         if self._mpiRank != 0:
             # init stderr intercepting logging
             filePath = os.path.join(
                 os.getcwd(), "logs", _RunLog.STDERR_NAME.format(name, self._mpiRank)
             )
-            self.stderrLogger = logging.getLogger(STDERR_LOGGER_NAME)
+            self.stderrLogger = getLogger(STDERR_LOGGER_NAME)
             h = logging.FileHandler(filePath)
             fmt = "%(message)s"
             form = logging.Formatter(fmt)
@@ -559,7 +559,48 @@ class NullLogger(RunLogger):
 
 # Setting the default logging class to be ours
 logging.RunLogger = RunLogger
-logging.setLoggerClass(RunLogger)
+
+
+def getLogger(name=None):
+    """
+    Return a logger with the specified name, creating it if necessary.
+    If no name is specified, return the root logger.
+
+    Get a logger with the specified name (channel name), creating it
+    if it doesn't yet exist. This name is a dot-separated hierarchical
+    name, such as "a", "a.b", "a.b.c" or similar.
+    If a PlaceHolder existed for the specified name [i.e. the logger
+    didn't exist but a child of it did], replace it with the created
+    logger and fix up the parent/child references which pointed to the
+    placeholder to now point to the logger.
+    """
+    # pylint: disable=protected-access
+    if not name or isinstance(name, str) and name == logging.root.name:
+        return logging.root
+
+    rv = None
+    if not isinstance(name, str):
+        raise TypeError("A logger name must be a string")
+    logging._acquireLock()
+    logManager = logging.Logger.manager
+    try:
+        if name in logManager.loggerDict:
+            rv = logManager.loggerDict[name]
+            if isinstance(rv, logging.PlaceHolder):
+                ph = rv
+                rv = RunLogger(name)
+                rv.manager = logManager
+                logManager.loggerDict[name] = rv
+                logManager._fixupChildren(ph, rv)
+                logManager._fixupParents(rv)
+        else:
+            rv = RunLogger(name)
+            rv.manager = logManager
+            logManager.loggerDict[name] = rv
+            logManager._fixupParents(rv)
+    finally:
+        logging._releaseLock()
+    return rv
 
 
 # ---------------------------------------
