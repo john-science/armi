@@ -1627,9 +1627,11 @@ class Database3(database.Database):
                 for paramName in params or h5GroupForType.keys():
                     if paramName == "location":
                         # cast to a numpy array so that we can use list indices
-                        data = numpy.array(layout.location)[layoutIndicesForType][
-                            indexInData
-                        ]
+                        if isJagged(layout.location):
+                            data = numpy.array(layout.location, dtype=object)
+                        else:
+                            data = numpy.array(layout.location)
+                        data = data[layoutIndicesForType][indexInData]
                     elif paramName in h5GroupForType:
                         dataSet = h5GroupForType[paramName]
                         try:
