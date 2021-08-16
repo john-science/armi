@@ -18,7 +18,7 @@ Module of utilities to help dealing with iterable objects in python
 import struct
 from itertools import tee, chain
 
-from numpy import nan
+from numpy import isnan, nan
 from six.moves import filterfalse, map, xrange, filter
 
 
@@ -100,25 +100,33 @@ def _flattenToShapes(element):
 
     There is some helpfulness built-in here to sidestep subtly jagged arrays.
     """
-    if isinstance(element, list):
-        if len(element) == 0:
+    if isinstance(element, dict):
+        yield nan
+    elif isinstance(element, list) or isinstance(element, tuple):
+        if len(element) == 0 or element[0] is None:
             yield nan
-        elif not hasattr(element[0], "__setitem__"):
-            # if the deepest elements are lists, we want to return their length
+        elif not hasattr(element[0], "__len__") or isinstance(element[0], str):
+            # if the deepest elements are lists/arrays, we want to return their length
+            for item in element:
+                if (
+                    not isinstance(element[0], str)
+                    and hasattr(item, "__len__")
+                    and len(item) > 1
+                ):
+                    yield nan
+                    break
             yield len(element)
         else:
             # the major flattening logic
             len0 = len(element[0])
             for item in element:
                 # ensure the mid-layer lists are of equal length
-                if item is None or len(item) != len0:
+                if not hasattr(item, "__len__") or len(item) != len0:
                     yield nan
                     break
 
                 # yield the length/shape of each sub-list
                 yield from _flattenToShapes(item)
-    elif isinstance(element, dict):
-        yield nan
     else:
         # yield the shape of the inner-most NumPy array
         yield element.shape
@@ -142,11 +150,17 @@ def isJagged(lst):
 
     shapes = _flattenToShapes(lst)
     ref = shapes.__next__()
+
+    iterations = 0
     for shape in shapes:
+        iterations += 1
         if shape == ref:
             # this check allows for np.nan shapes to fail the test
             continue
         return True
+
+    if not iterations:
+        return isnan(ref)
 
     return False
 

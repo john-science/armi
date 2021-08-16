@@ -86,16 +86,19 @@ class TestIterables(unittest.TestCase):
         return timeDelta
 
     def test_isJagged(self):
+        # simple list-of-lists
         rawListGood = [[1, 2, 3], [1, 2, 3], [1, 2, 3]]
         self.assertFalse(iterables.isJagged(rawListGood))
         rawListBad = [[1, 2, 3], [1, 2, 3], [1, 2, 3, 4]]
         self.assertTrue(iterables.isJagged(rawListBad))
 
+        # simple, but one list deeper
         raw3dGood = [[[1], [2], [3]], [[1], [2], [3]], [[1], [2], [3]]]
         self.assertFalse(iterables.isJagged(raw3dGood))
         raw3dBad = [[[1], [2], [3]], [[1], [2], [3]], [[1], [2], [3, 4]]]
         self.assertTrue(iterables.isJagged(raw3dBad))
 
+        # simple lists of 1D numpy arrays
         arrayListGood = [np.array([1, 2, 3]), np.array([1, 2, 3]), np.array([1, 2, 3])]
         self.assertFalse(iterables.isJagged(arrayListGood))
         arrayListBad = [
@@ -105,11 +108,13 @@ class TestIterables(unittest.TestCase):
         ]
         self.assertTrue(iterables.isJagged(arrayListBad))
 
+        # simple lists of 2D numpy arrays
         array2dListGood = [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))]
         self.assertFalse(iterables.isJagged(array2dListGood))
         array2dListBad = [np.zeros((3, 5)), np.ones((3, 6)), np.zeros((3, 5))]
         self.assertTrue(iterables.isJagged(array2dListBad))
 
+        # lists of lists of 2D numpy arrays
         array3dListGood = [
             [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
             [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
@@ -121,6 +126,7 @@ class TestIterables(unittest.TestCase):
         ]
         self.assertTrue(iterables.isJagged(array3dListBad))
 
+        # lists of lists of lists of 2D numpy arrays
         array4dListGood = [
             [
                 [np.zeros((3, 5)), np.ones((3, 5)), np.zeros((3, 5))],
@@ -144,13 +150,35 @@ class TestIterables(unittest.TestCase):
         ]
         self.assertTrue(iterables.isJagged(array4dListBad))
 
+        # a persnickety error that can be hard to miss, if your recursion is wonky
         rawSubtleBad = [[[1], [2], [3]], [[1], [2], [3], [4]], [[1], [2], [3]]]
         self.assertTrue(iterables.isJagged(rawSubtleBad))
 
+        # prove that we handle strings as data and not collections
         stringsGood = [["1", "2"], ["1", "2"], ["1", "2"]]
         self.assertFalse(iterables.isJagged(stringsGood))
         stringsBad = [["1", "2"], ["1", "2"], ["1", "2", "3"]]
         self.assertTrue(iterables.isJagged(stringsBad))
+
+        # make sure we handle tuples correctly
+        tuplesGoodList = [(1, 2), (3, 4), (8, 9)]
+        self.assertFalse(iterables.isJagged(tuplesGoodList))
+        tuplesBadList = [(1, 2), (3, 4, 5), (8, 9)]
+        self.assertTrue(iterables.isJagged(tuplesBadList))
+
+        # make sure we handle Nones correctly
+        nonesList = [None, None, None, (1, 2), (4, 5, 6), (1, 2), None]
+        self.assertTrue(iterables.isJagged(nonesList))
+
+        # Can we handle mixed collection types?
+        mixedTypesGood = [[1, 2, 3], (4, 5, 6)]
+        self.assertFalse(iterables.isJagged(mixedTypesGood))
+        mixedTypesBad = [[1, 2, 3], (4, 5, 6, 7)]
+        self.assertTrue(iterables.isJagged(mixedTypesBad))
+        veryMixedTypes = [[1, 2, 3], 7, (4, 5, 6)]
+        self.assertTrue(iterables.isJagged(veryMixedTypes))
+        veryMixedTypes2 = [1, [2, 3, 4], (7, 8, 9)]
+        self.assertTrue(iterables.isJagged(veryMixedTypes2))
 
     def test_sequence(self):
         # sequentially using methods in the usual way
