@@ -188,7 +188,6 @@ class SettingsReader:
 
     def readFromFile(self, path, handleInvalids=True):
         """Load file and read it."""
-
         with open(path, "r") as f:
             # make sure that we can actually open the file before trying to guess its
             # format. This will yield better error messages when things go awry.
@@ -217,9 +216,7 @@ class SettingsReader:
             self._readXml(stream, handleInvalids=handleInvalids)
 
     def _readXml(self, stream, handleInvalids=True):
-        """
-        Read user settings from XML stream.
-        """
+        """Read user settings from XML stream."""
         warnings.warn(
             "Loading from XML-format settings files is being deprecated.",
             DeprecationWarning,
@@ -341,14 +338,16 @@ class SettingsReader:
                 self.invalidSettings.add(settingName)
             else:
                 # apply validations
-                settingObj = self.cs.get_setting(settingName)
+                settingObj = self.cs.getSetting(settingName)
                 if value:
                     value = applyTypeConversions(settingObj, value)
 
                 # The value is automatically coerced into the
                 # expected type when set using either the default or
                 # user-defined schema
+                # TODO: NOPE: This can't use '.modified()`, because it is SUPPOSED to mutate the settings JOHN !!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 self.cs[settingName] = value
+                # self.cs = self.cs.modified(newSettings={settingName: value})
 
     def applyConversions(self, name, value):
         """

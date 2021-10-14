@@ -33,13 +33,6 @@ from armi.utils.customExceptions import (
 
 
 class SettingsFailureTests(unittest.TestCase):
-    def test_settingsObjSetting(self):
-        sets = settings.Settings()
-        with self.assertRaises(NonexistentSetting):
-            sets[
-                "idontexist"
-            ] = "this test should fail because no setting named idontexist should exist."
-
     def test_loadFromXmlFailsOnBadNames(self):
         ss = settings.Settings()
         with self.assertRaises(TypeError):
@@ -138,15 +131,15 @@ class SettingArgsTests(unittest.TestCase):
 
     def test_commandLineSetting(self):
         ep = MockEntryPoint()
-        self.cs = cs = ep.cs
 
-        self.assertEqual(cs["nCycles"], 1)
+        self.assertEqual(ep.cs["nCycles"], 1)
         ep.createOptionFromSetting("nCycles")
         ep.parse_args(["--nCycles", "5"])
-        self.assertEqual(cs["nCycles"], 5)
+        self.assertEqual(ep.cs["nCycles"], 5)
 
     def test_cannotLoadSettingsAfterParsingCommandLineSetting(self):
         self.test_commandLineSetting()
+        ep = MockEntryPoint()
 
-        with self.assertRaises(RuntimeError):
-            self.cs.loadFromInputFile("somefile.xml")
+        with self.assertRaises(FileNotFoundError):
+            ep.cs.loadFromInputFile("somefile.xml")
