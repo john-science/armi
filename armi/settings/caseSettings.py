@@ -338,7 +338,7 @@ class Settings:
         This enables users to run tests with their environment rather than the reference environment
         """
         for replacement in self.environmentSettings:
-            self[replacement] = otherCs[replacement]
+            self.__settings[replacement].setValue(otherCs[replacement])
 
     def modified(self, caseTitle=None, newSettings=None):
         """Return a new Settings object containing the provided modifications."""
