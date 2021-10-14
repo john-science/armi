@@ -16,7 +16,10 @@ Tests for generic fuel performance executers
 """
 import unittest
 
-from armi.physics.fuelPerformance.executers import CONF_BOND_REMOVAL, FuelPerformanceOptions
+from armi.physics.fuelPerformance.executers import (
+    CONF_BOND_REMOVAL,
+    FuelPerformanceOptions,
+)
 from armi.settings.caseSettings import Settings
 
 
@@ -28,8 +31,6 @@ class TestFuelPerformanceOptions(unittest.TestCase):
         cs = Settings()
         fpo.fromUserSettings(cs)
         self.assertEqual(fpo.bondRemoval, cs[CONF_BOND_REMOVAL])
-
-
 
 
 if __name__ == "__main__":
