@@ -186,6 +186,7 @@ class SettingsReader:
         """True if file read is in the old XML format."""
         return self.format == self.SettingsInputFormat.XML
 
+    # TODO: Should return new settings
     def readFromFile(self, path, handleInvalids=True):
         """Load file and read it."""
         with open(path, "r") as f:
@@ -199,6 +200,7 @@ class SettingsReader:
             except Exception as ee:
                 raise InvalidSettingsFileError(path, str(ee))
 
+    # TODO: Should return new settings
     def readFromStream(self, stream, handleInvalids=True, fmt=SettingsInputFormat.YAML):
         """Read from a file-like stream."""
         self.format = fmt
@@ -346,7 +348,10 @@ class SettingsReader:
                 # expected type when set using either the default or
                 # user-defined schema
                 # TODO: NOPE: This can't use '.modified()`, because it is SUPPOSED to mutate the settings JOHN !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                self.cs[settingName] = value
+                #self.cs[settingName] = value
+                self.cs.__settings
+                self.cs.__settings[settingName]
+                self.cs.__settings[settingName] = value
                 # self.cs = self.cs.modified(newSettings={settingName: value})
 
     def applyConversions(self, name, value):

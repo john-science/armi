@@ -148,7 +148,7 @@ class Settings:
         else:
             raise NonexistentSetting(key)
 
-    def __setitem__(self, key, val):
+    def TODO_JOHN__setitem__(self, key, val):
         # TODO: This potentially allows for invisible settings mutations and should be removed.
         if key in self.__settings:
             self.__settings[key].setValue(val)
