@@ -151,7 +151,9 @@ class SuiteBuilder:
         for index, modList in enumerate(self.modifierSets):
             case = copy.deepcopy(self.baseCase)
             previousMods = []
-            case.bp._prepConstruction(case.cs)
+            case.bp._prepConstruction(
+                case.cs
+            )  # TODO: This should not be a private method.
             for mod in modList:
                 # it may seem late to figure this out, but since we are doing it now, someone could
                 # filter these conditions out before the buildSuite. optionally, we could have a

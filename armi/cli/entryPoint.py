@@ -140,7 +140,6 @@ class EntryPoint:
         """
         Parse the command line arguments, with the command specific arguments.
         """
-
         if self.settingsArgument == "optional":
             self.parser.add_argument(
                 "settings_file",

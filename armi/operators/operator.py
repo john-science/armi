@@ -22,23 +22,23 @@ This is analogous to a real reactor operating over some period of time,
 often from initial startup, through the various cycles, and out to
 the end of plant life.
 """
-import time
-import shutil
-import re
 import os
+import re
+import shutil
+import time
 
 import armi
 from armi import context
+from armi import interfaces
 from armi import runLog
-from armi.bookkeeping import memoryProfiler
-from armi import utils
-from armi.utils import codeTiming
-from armi.utils import pathTools
 from armi import settings
+from armi import utils
+from armi.bookkeeping import memoryProfiler
+from armi.bookkeeping.report import reportingUtils
 from armi.operators import settingsValidation
 from armi.operators.runTypes import RunTypes
-from armi import interfaces
-from armi.bookkeeping.report import reportingUtils
+from armi.utils import codeTiming
+from armi.utils import pathTools
 
 
 class Operator:  # pylint: disable=too-many-public-methods
@@ -128,17 +128,12 @@ class Operator:  # pylint: disable=too-many-public-methods
         use a temporary local fast path (in case the user is working on a slow network path).
         """
         context.activateLocalFastPath()
-        try:
-            os.makedirs(context.getFastPath())
-        except OSError:
-            # If FAST_PATH exists already that generally should be an error because
-            # different processes will be stepping on each other.
-            # The exception to this rule is in cases that instantiate multiple operators in one
-            # process (e.g. unit tests that loadTestReactor). Since the FAST_PATH is set at
-            # import, these will use the same path multiple times. We pass here for that reason.
-            if not os.path.exists(context.getFastPath()):
-                # if it actually doesn't exist, that's an actual error. Raise
-                raise
+        # Ideally, if FAST_PATH exists already that generally should be an error because
+        # different processes will be stepping on each other.
+        # The exception to this rule is in cases that instantiate multiple operators in one
+        # process (e.g. unit tests that loadTestReactor). Since the FAST_PATH is set at
+        # import, these will use the same path multiple times.
+        os.makedirs(context.getFastPath(), exist_ok=True)
 
     def _getCycleLengths(self):
         """Return the cycle length for each cycle of the system as a list."""
@@ -424,7 +419,7 @@ class Operator:  # pylint: disable=too-many-public-methods
 
     def interactAllBOL(self, excludedInterfaceNames=()):
         """
-        Call interactBOL for all interfaces in the interface stack at beginning-of-life.
+        Call interactBOL for all interfaces in the interface stack at Beginning-of-Life.
 
         All enabled or bolForce interfaces will be called excluding interfaces with excludedInterfaceNames.
         """
@@ -441,7 +436,7 @@ class Operator:  # pylint: disable=too-many-public-methods
         self._interactAll("BOL", activeInterfaces)
 
     def interactAllBOC(self, cycle):
-        """Interact at beginning of cycle of all enabled interfaces."""
+        """Interact at Beginning of Cycle of all enabled interfaces."""
         activeInterfaces = [ii for ii in self.interfaces if ii.enabled()]
         if cycle < self.cs["deferredInterfacesCycle"]:
             activeInterfaces = [
