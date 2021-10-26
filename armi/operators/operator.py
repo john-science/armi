@@ -585,7 +585,6 @@ class Operator:  # pylint: disable=too-many-public-methods
             If an interface of the same name or function is already attached to the
             Operator.
         """
-
         if self.getInterface(interface.name):
             raise RuntimeError(
                 "An interface with name {0} is already attached.".format(interface.name)
