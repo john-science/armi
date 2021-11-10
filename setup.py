@@ -53,7 +53,7 @@ setup(
     # note that these are duplicated in requirements.txt
     install_requires=[
         "configparser",
-        "coverage>=6.0",
+        "coverage<6.0",
         "future",
         "h5py>=3.0",
         "matplotlib",
