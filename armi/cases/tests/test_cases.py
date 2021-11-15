@@ -15,13 +15,16 @@
 """
 Unit tests for Case and CaseSuite objects
 """
-import unittest
-import os
 import io
+import os
 import platform
+import unittest
+from filecmp import cmp
+from shutil import copyfile
 
 from armi import cases
 from armi import settings
+from armi.settings.setting import Setting
 from armi.utils import directoryChangers
 from armi.tests import ARMI_RUN_PATH
 from armi.tests import TEST_ROOT
@@ -111,6 +114,56 @@ class TestArmiCase(unittest.TestCase):
             newCase = cases.Case(newCs)
             for name, val in vals.items():
                 self.assertEqual(newCase.independentVariables[name], val)
+
+    def test_yamlizeOrdering(self):
+        """Ensure that yamlize writes output blueprint files in a predictable order every time"""
+        # build our case
+        geom = systemLayoutInput.SystemLayoutInput()
+        geom.readGeomFromStream(io.StringIO(GEOM_INPUT))
+        bp = blueprints.Blueprints.load(BLUEPRINT_INPUT)
+        cs = settings.Settings(ARMI_RUN_PATH)
+        cs = cs.modified(newSettings={"verbosity": "important"})
+        baseCase = cases.Case(cs, bp=bp, geom=geom)
+
+        # ensure we are not in IN_USE_TEST_ROOT
+        with directoryChangers.TemporaryDirectoryChanger():
+            vals = {"cladThickness": 1, "control strat": "good", "enrich": 0.9}
+            os.environ["PYTHONHASHSEED"] = "1"
+            case = baseCase.clone()
+            case._independentVariables = vals  # pylint: disable=protected-access
+            case.cs["power"] = 7
+            # case.cs["seven"] = Setting("seven", 7)
+            case.writeInputs()
+            newCs = settings.Settings(fName=case.title + ".yaml")
+            newCase = cases.Case(newCs)
+            for name, val in vals.items():
+                self.assertEqual(newCase.independentVariables[name], val)
+
+            copyfile(case.title + ".yaml", case.title + "_OLD.yaml")
+            os.environ["PYTHONHASHSEED"] = "333"
+
+            case2 = baseCase.clone()
+            case2._independentVariables = vals  # pylint: disable=protected-access
+            case2.cs["power"] = 7
+            # case.cs["seven"] = Setting("seven", 7)
+            case2.writeInputs()
+            newCs = settings.Settings(fName=case.title + ".yaml")
+            newCase = cases.Case(newCs)
+            for name, val in vals.items():
+                self.assertEqual(newCase.independentVariables[name], val)
+
+            try:
+                self.assertTrue(
+                    cmp(case.title + ".yaml", case.title + "_OLD.yaml", shallow=False)
+                )
+            except AssertionError:
+                print("FILE 1:")
+                print(open(case.title + "_OLD.yaml").read())
+                print("\n\nFILE 2:")
+                print(open(case.title + ".yaml").read())
+                os.environ["PYTHONHASHSEED"] = ""
+                raise
+            os.environ["PYTHONHASHSEED"] = ""
 
 
 class TestCaseSuiteDependencies(unittest.TestCase):
