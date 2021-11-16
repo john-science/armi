@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unit tests for input modifiers"""
-import unittest
-import os
 import io
+import os
+import unittest
 import yaml
+from filecmp import cmp
+from shutil import move
 
 from armi.utils import directoryChangers
 from armi import cases
@@ -137,6 +139,7 @@ class TestsuiteBuilderIntegrations(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "before .*SmearDensityModifier"):
             builder.buildSuite()
 
+    # TODO: What is this testing?
     def test_example(self):
         builder = suiteBuilder.SeparateEffectsSuiteBuilder(self.baseCase)
         builder.addDegreeOfFreedom(
@@ -164,11 +167,91 @@ class TestsuiteBuilderIntegrations(unittest.TestCase):
 
             self.assertTrue(os.path.exists("case-suite"))
 
+    def test_yamlizeOrder(self):
+        """Ensure that when we write blueprints to file, they are printed in a deterministic order"""
+        builder = suiteBuilder.SeparateEffectsSuiteBuilder(self.baseCase)
+        builder.addDegreeOfFreedom(
+            inputModifiers.SettingsModifier("fpModel", v)
+            for v in ("noFissionProducts", "infinitelyDilute", "MO99")
+        )
+        builder.addDegreeOfFreedom(
+            inputModifiers.SettingsModifier("detailedAxialExpansion", v)
+            for v in (True,)
+        )
+        builder.addDegreeOfFreedom(
+            inputModifiers.SettingsModifier("buGroups", v)
+            for v in (
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 100],
+                [3, 5, 7, 9, 10, 20, 100],
+                [3, 5, 10, 15, 20, 100],
+            )
+        )
+        builder.addDegreeOfFreedom((inputModifiers.FullCoreModifier(),))
+
+        with directoryChangers.TemporaryDirectoryChanger():
+            suite = builder.buildSuite()
+            for c in suite:
+                c.writeInputs()
+                break
+
+            self.assertTrue(os.path.exists("case-suite"))
+
+            txt = open("case-suite/0000/armi-0000-blueprints.yaml", "r").read()
+            txt = txt.split("block 5")[1].split("  clad:")[1].split("  hex:")[0]
+
+            order = [
+                "flags",
+                "shape",
+                "material",
+                "Tinput",
+                "Thot",
+                "isotopics",
+                "latticeIDs",
+                "origin",
+                "orientation",
+                "mergeWith",
+                "area",
+                "widthOuter",
+                "inner_radius",
+                "outer_minor_radius",
+                "inner_minor_radius",
+                "ip",
+                "lengthOuter",
+                "heightInner",
+                "nHoles",
+                "reference_volume",
+                "inner_axial",
+                "od",
+                "outer_phi",
+                "inner_phi",
+                "op",
+                "major_radius",
+                "inner_theta",
+                "radius_differential",
+                "lengthInner",
+                "heightOuter",
+                "height",
+                "mult",
+                "base",
+                "outer_radius",
+                "helixDiameter",
+                "volume",
+                "holeOD",
+                "widthInner",
+                "modArea",
+                "outer_theta",
+                "azimuthal_differential",
+                "axialPitch",
+                "id",
+            ]
+
+            for key in range(len(order) - 1, -1, -1):
+                self.assertIn(order[key] + ":", txt)
+                txt = txt.split(order[key] + ":")[0]
+
     def test_BluePrintBlockModifier(self):
         """test BluePrintBlockModifier with build suite naming function argument"""
-
         case_nbr = 1
-
         builder = suiteBuilder.FullFactorialSuiteBuilder(self.baseCase)
 
         builder.addDegreeOfFreedom(
