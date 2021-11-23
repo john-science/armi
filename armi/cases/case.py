@@ -445,7 +445,7 @@ class Case:
         but not long after (because nucDir is framework-level and expected to be
         up-to-date by lots of modules).
         """
-        imposeBurnChainByFile(cs["burnChainFileName"])
+        imposeBurnChainByFile(self.cs["burnChainFileName"])
 
     def checkInputs(self):
         """
