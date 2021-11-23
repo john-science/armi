@@ -54,7 +54,7 @@ from armi.utils import pathTools
 from armi.utils.directoryChangers import DirectoryChanger
 from armi.utils.directoryChangers import ForcedCreationDirectoryChanger
 from armi.utils import textProcessors
-from armi.nucDirectory import nuclideBases
+from armi.nucDirectory.nuclideBases import imposeBurnChainByFile
 
 # change from default .coverage to help with Windows dotfile issues.
 # Must correspond with data_file entry in `coveragerc`!!
@@ -445,8 +445,7 @@ class Case:
         but not long after (because nucDir is framework-level and expected to be
         up-to-date by lots of modules).
         """
-        with open(self.cs["burnChainFileName"]) as burnChainStream:
-            nuclideBases.imposeBurnChain(burnChainStream)
+        imposeBurnChainByFile(cs["burnChainFileName"])
 
     def checkInputs(self):
         """

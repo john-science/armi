@@ -406,6 +406,12 @@ def imposeBurnChain(burnChainStream):
         nuclide._processBurnData(burnInfo)  # pylint: disable=protected-access
 
 
+def imposeBurnChainByFile(burnChainFilePath):
+    """Helper method to ``imposeBurnChain``, that takes a file path rather than a stream."""
+    with open(burnChainFilePath) as burnChainStream:
+        imposeBurnChain(burnChainStream)
+
+
 def factory():
     """
     Reads data files to instantiate the :py:class:`INuclides <INuclide>`.
