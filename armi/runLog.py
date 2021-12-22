@@ -102,7 +102,7 @@ class _RunLog:
         self.setNullLoggers()
         self._setLogLevels()
 
-    def setNullLoggers(self):
+    def setNullLoggers(self) -> None:
         """Helper method to set both of our loggers to Null handlers"""
         self.logger = NullLogger("NULL")
         self.stderrLogger = NullLogger("NULL2", isStderr=True)
@@ -172,17 +172,17 @@ class _RunLog:
 
         return self.logger.getDuplicatesFilter()
 
-    def clearSingleWarnings(self):
+    def clearSingleWarnings(self) -> None:
         """Reset the single warned list so we get messages again."""
         dupsFilter = self.getDuplicatesFilter()
         if dupsFilter:
             dupsFilter.singleMessageCounts.clear()
 
-    def warningReport(self):
+    def warningReport(self) -> None:
         """Summarize all warnings for the run."""
         self.logger.warningReport()
 
-    def getLogVerbosityRank(self, level):
+    def getLogVerbosityRank(self, level: str) -> int:
         """Return integer verbosity rank given the string verbosity name."""
         try:
             return self.logLevels[level][0]
@@ -236,16 +236,16 @@ class _RunLog:
                 handler.setLevel(self._verbosity)
             self.logger.setLevel(self._verbosity)
 
-    def getVerbosity(self):
+    def getVerbosity(self) -> int:
         """Return the global runLog verbosity."""
         return self._verbosity
 
-    def restoreStandardStreams(self):
+    def restoreStandardStreams(self) -> None:
         """Set the system stderr back to its default (as it was when the run started)."""
         if self.initialErr is not None and self._mpiRank > 0:
             sys.stderr = self.initialErr
 
-    def startLog(self, name):
+    def startLog(self, name: str) -> None:
         """Initialize the streams when parallel processing"""
         # open the main logger
         self.logger = logging.getLogger(STDOUT_LOGGER_NAME + SEP + str(self._mpiRank))
@@ -273,7 +273,7 @@ class _RunLog:
             sys.stderr = self.stderrLogger
 
 
-def close(mpiRank=None):
+def close(mpiRank=None) -> None:
     """End use of the log. Concatenate if needed and restore defaults"""
     mpiRank = context.MPI_RANK if mpiRank is None else mpiRank
 
@@ -356,31 +356,31 @@ def raw(msg):
     LOG.log("header", msg, single=False, label=msg)
 
 
-def extra(msg, single=False, label=None):
+def extra(msg: str, single: bool = False, label: str = None):
     LOG.log("extra", msg, single=single, label=label)
 
 
-def debug(msg, single=False, label=None):
+def debug(msg: str, single: bool = False, label: str = None) -> None:
     LOG.log("debug", msg, single=single, label=label)
 
 
-def info(msg, single=False, label=None):
+def info(msg: str, single: bool = False, label: str = None):
     LOG.log("info", msg, single=single, label=label)
 
 
-def important(msg, single=False, label=None):
+def important(msg: str, single: bool = False, label: str = None):
     LOG.log("important", msg, single=single, label=label)
 
 
-def warning(msg, single=False, label=None):
+def warning(msg: str, single: bool = False, label: str = None):
     LOG.log("warning", msg, single=single, label=label)
 
 
-def error(msg, single=False, label=None):
+def error(msg: str, single: bool = False, label: str = None):
     LOG.log("error", msg, single=single, label=label)
 
 
-def header(msg, single=False, label=None):
+def header(msg: str, single: bool = False, label: str = None):
     LOG.log("header", msg, single=single, label=label)
 
 
@@ -392,7 +392,7 @@ def setVerbosity(level):
     LOG.setVerbosity(level)
 
 
-def getVerbosity():
+def getVerbosity() -> int:
     return LOG.getVerbosity()
 
 
@@ -407,12 +407,12 @@ class DeduplicationFilter(logging.Filter):
     * handles special indentation rules for our logs
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         logging.Filter.__init__(self, *args, **kwargs)
         self.singleMessageCounts = {}
         self.singleWarningMessageCounts = {}
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         # determine if this is a "do not duplicate" message
         msg = str(record.msg)
         single = getattr(record, "single", False)
@@ -518,22 +518,22 @@ class RunLogger(logging.Logger):
 
         logging.Logger._log(self, *args, **kwargs)
 
-    def allowStopDuplicates(self):
+    def allowStopDuplicates(self) -> None:
         """helper method to allow us to safely add the deduplication filter at any time"""
         for f in self.filters:
             if isinstance(f, DeduplicationFilter):
                 return
         self.addFilter(DeduplicationFilter())
 
-    def write(self, msg, **kwargs):
+    def write(self, msg: str, **kwargs) -> None:
         """the redirect method that allows to do stderr piping"""
         self.error(msg)
 
-    def flush(self, *args, **kwargs):
+    def flush(self, *args, **kwargs) -> None:
         """stub, purely to allow stderr piping"""
         pass
 
-    def close(self):
+    def close(self) -> None:
         """helper method, to shutdown and delete a Logger"""
         self.handlers.clear()
         del self
@@ -546,7 +546,7 @@ class RunLogger(logging.Logger):
 
         return None
 
-    def warningReport(self):
+    def warningReport(self) -> None:
         """Summarize all warnings for the run."""
         self.info("----- Final Warning Count --------")
         self.info("  {0:^10s}   {1:^25s}".format("COUNT", "LABEL"))
@@ -565,7 +565,7 @@ class RunLogger(logging.Logger):
             self.info("  {0:^10s}   {1:^25s}".format(str(count), str(label)))
         self.info("------------------------------------")
 
-    def setVerbosity(self, intLevel):
+    def setVerbosity(self, intLevel: int) -> None:
         """A helper method to try to partially support the local, historical method of the same name"""
         self.setLevel(intLevel)
 
@@ -583,7 +583,7 @@ class NullLogger(RunLogger):
         else:
             self.handlers = [logging.StreamHandler(sys.stdout)]
 
-    def addHandler(self, *args, **kwargs):
+    def addHandler(self, *args, **kwargs) -> None:
         """ensure this STAYS a null logger"""
         pass
 
@@ -596,7 +596,7 @@ logging.setLoggerClass(RunLogger)
 # ---------------------------------------
 
 
-def logFactory():
+def logFactory() -> _RunLog:
     """Create the default logging object."""
     return _RunLog(int(context.MPI_RANK))
 
