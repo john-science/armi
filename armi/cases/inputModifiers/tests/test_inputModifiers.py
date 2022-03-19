@@ -115,6 +115,7 @@ class TestsuiteBuilderIntegrations(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "before .*SmearDensityModifier"):
             builder.buildSuite()
 
+    # TODO: JOHN NAME is terrible
     def test_example(self):
         builder = suiteBuilder.SeparateEffectsSuiteBuilder(self.baseCase)
         builder.addDegreeOfFreedom(
