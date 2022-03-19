@@ -186,7 +186,6 @@ def insertCoreDesignReport(core, cs, report):
 def _setGeneralCoreDesignData(cs, coreDesignTable):
     coreDesignTable.addRow(["Case Title", "{}".format(cs.caseTitle)])
     coreDesignTable.addRow(["Run Type", "{}".format(cs["runType"])])
-    coreDesignTable.addRow(["Geometry File", "{}".format(cs["geomFile"])])
     coreDesignTable.addRow(["Loading File", "{}".format(cs["loadingFile"])])
     coreDesignTable.addRow(
         ["Fuel Shuffling Logic File", "{}".format(cs["shuffleLogic"])]

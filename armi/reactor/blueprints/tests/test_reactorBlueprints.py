@@ -56,13 +56,6 @@ sfp:
       IC IC
 """
 
-GEOM = """<?xml version="1.0" ?>
-<reactor geom="hex" symmetry="third core periodic">
-    <assembly name="IC" pos="1" ring="1"/>
-    <assembly name="IC" pos="2" ring="2"/>
-</reactor>
-"""
-
 
 class TestReactorBlueprints(unittest.TestCase):
     """Tests for reactor blueprints."""
@@ -76,15 +69,8 @@ class TestReactorBlueprints(unittest.TestCase):
         self.assertAlmostEqual(self.systemDesigns["sfp"].origin.y, 12.1)
 
     def _setupReactor(self):
-        fnames = [self._testMethodName + n for n in ["geometry.xml", "sfp-geom.xml"]]
-        for fn in fnames:
-            with open(fn, "w") as f:
-                f.write(GEOM)
-
-        # test migration from geometry xml files
+        # test migration from geometry xml files (TODO: JOHN)
         cs = settings.Settings()
-        newSettings = {"geomFile": self._testMethodName + "geometry.xml"}
-        cs = cs.modified(newSettings=newSettings)
 
         bp = blueprints.Blueprints.load(
             test_customIsotopics.TestCustomIsotopics.yamlString

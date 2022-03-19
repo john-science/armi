@@ -960,9 +960,6 @@ class Operator:  # pylint: disable=too-many-public-methods
             "Shuffle logic for snapshot", self.cs["shuffleLogic"], newFolder
         )
         pathTools.copyOrWarn(
-            "Geometry file for snapshot", self.cs["geomFile"], newFolder
-        )
-        pathTools.copyOrWarn(
             "Loading definition for snapshot", self.cs["loadingFile"], newFolder
         )
         pathTools.copyOrWarn(

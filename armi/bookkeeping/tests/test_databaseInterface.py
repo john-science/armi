@@ -51,7 +51,6 @@ def getSimpleDBOperator(cs):
     newSettings["verbosity"] = "important"
     newSettings["db"] = True
     newSettings["runType"] = "Standard"
-    newSettings["geomFile"] = "geom1Assem.xml"
     newSettings["nCycles"] = 2
     newSettings[CONF_FORCE_DB_PARAMS] = [
         "baseBu",
@@ -115,7 +114,6 @@ class TestDatabaseWriter(unittest.TestCase):
             self.assertIn("machines", h5.attrs)
             self.assertIn("caseTitle", h5.attrs)
 
-            self.assertIn("geomFile", h5["inputs"])
             self.assertIn("settings", h5["inputs"])
             self.assertIn("blueprints", h5["inputs"])
             self.assertIn("baseBu", h5["c01n02/HexBlock"])

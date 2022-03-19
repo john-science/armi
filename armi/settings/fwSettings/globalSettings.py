@@ -67,7 +67,6 @@ CONF_DUMP_SNAPSHOT = "dumpSnapshot"
 CONF_DO_ORIFICED_TH = "doOrificedTH"  # zones
 CONF_EQ_DIRECT = "eqDirect"  # fuelCycle/equilibrium coupling
 CONF_FRESH_FEED_TYPE = "freshFeedType"
-CONF_GEOM_FILE = "geomFile"
 CONF_START_CYCLE = "startCycle"
 CONF_LOADING_FILE = "loadingFile"
 CONF_START_NODE = "startNode"
@@ -432,12 +431,6 @@ def defineSettings() -> List[setting.Setting]:
             label="Fresh Feed Type",
             description="None",
             options=["feed fuel", "igniter fuel", "inner driver fuel"],
-        ),
-        setting.Setting(
-            CONF_GEOM_FILE,
-            default="",
-            label="Core Map Input File",
-            description="Input file containing BOL core map.",
         ),
         setting.Setting(
             CONF_GROW_TO_FULL_CORE_AFTER_LOAD,

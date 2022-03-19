@@ -212,7 +212,6 @@ class InjectInputs(EntryPoint):
             # Instead, we assume that we know where to store them, and do it ourselves.
             for data, key in [
                 (bp, "blueprints"),
-                (geom, "geomFile"),
                 (settings, "settings"),
             ]:
                 if data is not None:

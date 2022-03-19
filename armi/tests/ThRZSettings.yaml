@@ -7,7 +7,6 @@ settings:
   db: false
   economics: false
   genXS: Neutron
-  geomFile: ThRZGeom.xml
   groupStructure: ARMI45
   loadingFile: ThRZloading.yaml
   numProcessors: 12

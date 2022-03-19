@@ -540,14 +540,8 @@ def migrate(bp: Blueprints, cs):
     Apply migrations to the input structure.
 
     This is a good place to perform migrations that address changes to the system design
-    description (settings, blueprints, geom file). We have access to all three here, so
-    we can even move stuff between files. Namely, this:
-
-     * creates a grid blueprint to represent the core layout from the old ``geomFile``
-       setting, and applies that grid to a ``core`` system.
-     * moves the radial and azimuthal submesh values from the ``geomFile`` to the
-       assembly designs, but only if they are uniform (this is limiting, but could be
-       made more sophisticated in the future, if there is need)
+    description (settings, blueprints). We have access to all three here, so
+    we can even move stuff between files.
 
     This allows settings-driven core map to still be used for backwards compatibility.
     At some point once the input stabilizes, we may wish to move this out to the
@@ -564,12 +558,6 @@ def migrate(bp: Blueprints, cs):
     if "core" in [rd.name for rd in bp.gridDesigns]:
         raise ValueError("Cannot auto-create a 2nd `core` grid. Adjust input.")
 
-    geom = systemLayoutInput.SystemLayoutInput()
-    geom.readGeomFromFile(os.path.join(cs.inputDirectory, cs["geomFile"]))
-    gridDesigns = geom.toGridBlueprints("core")
-    for design in gridDesigns:
-        bp.gridDesigns[design.name] = design
-
     if "core" in [rd.name for rd in bp.systemDesigns]:
         raise ValueError(
             "Core map is defined in both the ``geometry`` setting and in "
@@ -578,23 +566,3 @@ def migrate(bp: Blueprints, cs):
         )
     bp.systemDesigns["core"] = SystemBlueprint("core", "core", Triplet())
 
-    if geom.geomType in (geometry.GeomType.RZT, geometry.GeomType.RZ):
-        aziMeshes = {indices[4] for indices, _ in geom.assemTypeByIndices.items()}
-        radMeshes = {indices[5] for indices, _ in geom.assemTypeByIndices.items()}
-
-        if len(aziMeshes) > 1 or len(radMeshes) > 1:
-            raise ValueError(
-                "The system layout described in {} has non-uniform "
-                "azimuthal and/or radial submeshing. This migration is currently "
-                "only smart enough to handle a single radial and single azimuthal "
-                "submesh for all assemblies.".format(cs["geomFile"])
-            )
-        radMesh = next(iter(radMeshes))
-        aziMesh = next(iter(aziMeshes))
-
-        for _, aDesign in bp.assemDesigns.items():
-            aDesign.radialMeshPoints = radMesh
-            aDesign.azimuthalMeshPoints = aziMesh
-
-    # Someday: write out the migrated file. At the moment this messes up the case
-    # title and doesn't yet have the other systems in place so this isn't the right place.

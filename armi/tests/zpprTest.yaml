@@ -32,7 +32,6 @@ settings:
   epsCyclic: 1.0
   epsEig: 1e-10
   genXS: Neutron
-  geomFile: zpprTestGeom.xml
   loadingFile: 1DslabXSByCompTest.yaml
   max2SigmaCladIDT: 630.0
   maxFlowZones: 12
