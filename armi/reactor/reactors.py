@@ -47,7 +47,6 @@ from armi.reactor import geometry
 from armi.reactor import grids
 from armi.reactor import parameters
 from armi.reactor import reactorParameters
-from armi.reactor import systemLayoutInput
 from armi.reactor import zones
 from armi.reactor.flags import Flags
 from armi.settings.fwSettings.globalSettings import CONF_MATERIAL_NAMESPACE_ORDER
@@ -113,19 +112,15 @@ class Reactor(composites.Composite):
 
 
 def loadFromCs(cs):
-    """
-    Load a Reactor based on the input settings.
-    """
+    """Load a Reactor based on the input settings."""
     from armi.reactor import blueprints
 
     bp = blueprints.loadFromCs(cs)
     return factory(cs, bp)
 
 
-def factory(cs, bp, geom: Optional[systemLayoutInput.SystemLayoutInput] = None):
-    """
-    Build a reactor from input settings, blueprints and geometry.
-    """
+def factory(cs, bp):
+    """Build a reactor from input settings and blueprints"""
     from armi.reactor import blueprints
 
     runLog.header("=========== Constructing Reactor and Verifying Inputs ===========")
@@ -135,9 +130,6 @@ def factory(cs, bp, geom: Optional[systemLayoutInput.SystemLayoutInput] = None):
         materials.setMaterialNamespaceOrder(cs[CONF_MATERIAL_NAMESPACE_ORDER])
     r = Reactor(cs.caseTitle, bp)
 
-    if cs["geomFile"]:
-        blueprints.migrate(bp, cs)
-
     with directoryChangers.DirectoryChanger(cs.inputDirectory, dumpOnException=False):
         # always construct the core first (for assembly serial number purposes)
         if not bp.systemDesigns:
@@ -145,7 +137,7 @@ def factory(cs, bp, geom: Optional[systemLayoutInput.SystemLayoutInput] = None):
                 "The input must define a `core` system, but does not. Update inputs"
             )
         coreDesign = bp.systemDesigns["core"]
-        coreDesign.construct(cs, bp, r, geom=geom)
+        coreDesign.construct(cs, bp, r)
         for structure in bp.systemDesigns:
             if structure.name.lower() != "core":
                 structure.construct(cs, bp, r)
@@ -184,10 +176,6 @@ class Core(composites.Composite):
         ----------
         name : str
             Name of the object. Flags will inherit from this.
-        geom : SystemLayoutInput object
-            Contains face-map
-        cs : CaseSettings object, optional
-            the calculation settings dictionary
         """
         composites.Composite.__init__(self, name)
         self.p.flags = Flags.fromStringIgnoreErrors(name)

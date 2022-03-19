@@ -28,7 +28,6 @@ from armi import runLog, settings, utils
 from armi.utils import pathTools
 from armi.utils.mathematics import expandRepeatedFloats
 from armi.reactor import geometry
-from armi.reactor import systemLayoutInput
 from armi.physics import neutronics
 from armi.utils import directoryChangers
 from armi.settings.fwSettings import globalSettings
@@ -296,16 +295,6 @@ class Inspector:
 
     def _csRelativePath(self, filename):
         return os.path.join(self.cs.inputDirectory, filename)
-
-    def _setGeomType(self):
-        if self.cs["geomFile"]:
-            with directoryChangers.DirectoryChanger(
-                self.cs.inputDirectory, dumpOnException=False
-            ):
-                geom = systemLayoutInput.SystemLayoutInput()
-                geom.readGeomFromFile(self.cs["geomFile"])
-
-            self.geomType, self.coreSymmetry = geom.geomType, geom.symmetry
 
     def _inspectSettings(self):
         """Check settings for inconsistencies."""

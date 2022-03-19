@@ -42,9 +42,9 @@ class LatinHyperCubeModifier(SamplingInputModifier):
         )
         self.value = None
 
-    def __call__(self, cs, bp, geom):
+    def __call__(self, cs, bp):
         cs = cs.modified(newSettings={self.name: self.value})
-        return cs, bp, geom
+        return cs, bp
 
 
 class TestLatinHyperCubeSuiteBuilder(unittest.TestCase):

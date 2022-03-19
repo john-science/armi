@@ -21,7 +21,6 @@ from armi.utils import directoryChangers
 from armi import cases
 from armi.cases import suiteBuilder
 from armi.reactor import blueprints
-from armi.reactor import systemLayoutInput
 from armi import settings
 from armi.cases.inputModifiers import (
     neutronicsModifiers,
@@ -29,10 +28,6 @@ from armi.cases.inputModifiers import (
     pinTypeInputModifiers,
 )
 from armi.reactor.tests import test_reactors
-
-
-class MockGeom:
-    geomType = "hex"
 
 
 FLAGS_INPUT = """nuclide flags:
@@ -97,31 +92,14 @@ BLUEPRINT_INPUT_LINKS = f"""
 assemblies: {{}}
 """
 
-GEOM_INPUT = io.StringIO(
-    """<?xml version="1.0" ?>
-<reactor geom="hex" symmetry="third core periodic">
-    <assembly name="A1" pos="1"  ring="1"/>
-    <assembly name="A2" pos="2"  ring="2"/>
-    <assembly name="A3" pos="1"  ring="2"/>
-    <assembly name="A4" pos="3"  ring="3"/>
-    <assembly name="A5" pos="2"  ring="3"/>
-    <assembly name="A6" pos="12" ring="3"/>
-    <assembly name="A7" pos="4"  ring="3"/>
-    <assembly name="A8" pos="1"  ring="3"/>
-</reactor>
-"""
-)
-
 
 class TestsuiteBuilderIntegrations(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        geom = systemLayoutInput.SystemLayoutInput()
-        geom.readGeomFromStream(GEOM_INPUT)
         bp = blueprints.Blueprints.load(BLUEPRINT_INPUT_LINKS)
         cs = settings.Settings()
         bp._prepConstruction(cs)
-        cls.baseCase = cases.Case(cs=cs, bp=bp, geom=geom)
+        cls.baseCase = cases.Case(cs=cs, bp=bp)
 
     def test_SmearDensityFail(self):
         builder = suiteBuilder.FullFactorialSuiteBuilder(self.baseCase)
@@ -231,9 +209,9 @@ class NeutronicsKernelOpts(inputModifiers.InputModifier):
         inputModifiers.InputModifier.__init__(self)
         self.neutronicsKernelOpts = neutronicsKernelOpts
 
-    def __call__(self, cs, bp, geom):
+    def __call__(self, cs, bp):
         cs = cs.modified(self.neutronicsKernelOpts)
-        return cs, bp, geom
+        return cs, bp
 
 
 class TestFullCoreModifier(unittest.TestCase):

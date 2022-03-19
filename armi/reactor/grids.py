@@ -1775,11 +1775,6 @@ class ThetaRZGrid(Grid):
             list of ((indices), assemName) tuples for all positions in core with input
             in radians
 
-        See Also
-        --------
-        armi.reactor.systemLayoutInput.SystemLayoutInput.readGeomXML : produces the geomInfo
-        structure
-
         Examples
         --------
         >>> grid = grids.ThetaRZGrid.fromGeom(geomInfo)

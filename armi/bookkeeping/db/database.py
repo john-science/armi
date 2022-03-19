@@ -15,7 +15,6 @@
 """
 from typing import Generator, Tuple
 from armi.settings import caseSettings
-from armi.reactor import systemLayoutInput
 
 
 class Database:
@@ -35,9 +34,6 @@ class Database:
     # be imported until after plugins are registered, and this module gets imported by
     # plugins as they are being registered.
     def loadBlueprints(self):
-        raise NotImplementedError()
-
-    def loadGeometry(self) -> systemLayoutInput.SystemLayoutInput:
         raise NotImplementedError()
 
     def genTimeSteps(self) -> Generator[Tuple[int, int], None, None]:
@@ -77,8 +73,8 @@ class Database:
         """
         raise NotImplementedError()
 
-    def writeInputsToDB(self, cs, csString=None, geomString=None, bpString=None):
-        """Write settings, blueprints, and/or geometry files to the DB"""
+    def writeInputsToDB(self, cs, csString=None, bpString=None):
+        """Write settings and blueprints to the DB"""
         raise NotImplementedError()
 
     def readInputsFromDB(self):

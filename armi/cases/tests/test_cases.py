@@ -15,26 +15,19 @@
 """
 Unit tests for Case and CaseSuite objects
 """
-import unittest
-import os
 import io
+import os
 import platform
+import unittest
 
 from armi import cases
 from armi import settings
 from armi.utils import directoryChangers
 from armi.tests import ARMI_RUN_PATH
 from armi.tests import TEST_ROOT
-from armi.reactor import blueprints, systemLayoutInput
+from armi.reactor import blueprints
 
 
-GEOM_INPUT = """<?xml version="1.0" ?>
-<reactor geom="hex" symmetry="third core periodic">
-    <assembly name="A1" pos="1"  ring="1"/>
-    <assembly name="A2" pos="2"  ring="2"/>
-    <assembly name="A3" pos="1"  ring="2"/>
-</reactor>
-"""
 # This gets made into a StringIO multiple times because
 # it gets read multiple times.
 
@@ -96,12 +89,10 @@ class TestArmiCase(unittest.TestCase):
 
     def test_independentVariables(self):
         """Ensure that independentVariables added to a case move with it."""
-        geom = systemLayoutInput.SystemLayoutInput()
-        geom.readGeomFromStream(io.StringIO(GEOM_INPUT))
         bp = blueprints.Blueprints.load(BLUEPRINT_INPUT)
         cs = settings.Settings(ARMI_RUN_PATH)
         cs = cs.modified(newSettings={"verbosity": "important"})
-        baseCase = cases.Case(cs, bp=bp, geom=geom)
+        baseCase = cases.Case(cs, bp=bp)
         with directoryChangers.TemporaryDirectoryChanger():  # ensure we are not in IN_USE_TEST_ROOT
             vals = {"cladThickness": 1, "control strat": "good", "enrich": 0.9}
             case = baseCase.clone()
@@ -119,15 +110,13 @@ class TestCaseSuiteDependencies(unittest.TestCase):
     def setUp(self):
         self.suite = cases.CaseSuite(settings.Settings())
 
-        geom = systemLayoutInput.SystemLayoutInput()
-        geom.readGeomFromStream(io.StringIO(GEOM_INPUT))
         bp = blueprints.Blueprints.load(BLUEPRINT_INPUT)
 
-        self.c1 = cases.Case(cs=settings.Settings(), geom=geom, bp=bp)
+        self.c1 = cases.Case(cs=settings.Settings(), bp=bp)
         self.c1.cs.path = "c1.yaml"
         self.suite.add(self.c1)
 
-        self.c2 = cases.Case(cs=settings.Settings(), geom=geom, bp=bp)
+        self.c2 = cases.Case(cs=settings.Settings(), bp=bp)
         self.c2.cs.path = "c2.yaml"
         self.suite.add(self.c2)
 

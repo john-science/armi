@@ -31,8 +31,6 @@ varied scenarios.
 See Also
 --------
 armi.reactor.blueprints.gridBlueprints : Method for storing system assembly layouts.
-armi.reactor.systemLayoutInput.SystemLayoutInput : Deprecated method for reading the individual
-face-map xml files.
 """
 import tabulate
 import yamlize
@@ -94,22 +92,18 @@ class SystemBlueprint(yamlize.Object):
 
         return cls
 
-    def construct(self, cs, bp, reactor, geom=None):
+    def construct(self, cs, bp, reactor):
         """Build a core/IVS/EVST/whatever and fill it with children."""
         from armi.reactor import reactors  # avoid circular import
 
         runLog.info("Constructing the `{}`".format(self.name))
 
-        # TODO: We should consider removing automatic geom file migration.
-        if geom is not None and self.name == "core":
-            gridDesign = geom.toGridBlueprints("core")[0]
-        else:
-            if not bp.gridDesigns:
-                raise ValueError(
-                    "The input must define grids to construct a reactor, but "
-                    "does not. Update input."
-                )
-            gridDesign = bp.gridDesigns.get(self.gridName, None)
+        if not bp.gridDesigns:
+            raise ValueError(
+                "The input must define grids to construct a reactor, but "
+                "does not. Update input."
+            )
+        gridDesign = bp.gridDesigns.get(self.gridName, None)
 
         system = self._resolveSystemType(self.typ)(self.name)
 

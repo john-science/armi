@@ -87,11 +87,10 @@ class SuiteBuilder:
 
         Parameters
         ----------
-        inputModifiers : list(callable(CaseSettings, Blueprints, SystemLayoutInput))
-            A list of callable objects with the signature
-            ``(CaseSettings, Blueprints, SystemLayoutInput)``. When these objects are called
-            they should perturb the settings, blueprints, and/or geometry by some amount determined
-            by their construction.
+        inputModifiers : list(callable(CaseSettings, Blueprints))
+            A list of callable objects with the signature ``(CaseSettings, Blueprints)``. When
+            these objects are called they should perturb the settings and/or blueprints by
+            some amount determinedby their construction.
         """
         raise NotImplementedError
 
@@ -170,7 +169,7 @@ class SuiteBuilder:
                     )
 
                 previousMods.append(type(mod))
-                case.cs, case.bp, case.geom = mod(case.cs, case.bp, case.geom)
+                case.cs, case.bp = mod(case.cs, case.bp)
                 case.independentVariables.update(mod.independentVariable)
 
             case.cs.path = namingFunc(index, case, modList)
@@ -201,9 +200,9 @@ class FullFactorialSuiteBuilder(SuiteBuilder):
                     self.settingName = settingName
                     self.value = value
 
-                def __call__(self, cs, bp, geom):
+                def __call__(self, cs, bp):
                     cs = cs.modified(newSettings={settignName: value})
-                    return cs, bp, geom
+                    return cs, bp
 
             builder = FullFactorialSuiteBuilder(someCase)
             builder.addDegreeOfFreedom(SettingModifier('settingName1', value) for value in (1,2))
@@ -288,9 +287,9 @@ class SeparateEffectsSuiteBuilder(SuiteBuilder):
                     self.settingName = settingName
                     self.value = value
 
-                def __call__(self, cs, bp, geom):
+                def __call__(self, cs, bp):
                     cs = cs.modified(newSettings={settignName: value})
-                    return cs, bp, geom
+                    return cs, bp
 
             builder = SeparateEffectsSuiteBuilder(someCase)
             builder.addDegreeOfFreedom(SettingModifier('settingName1', value) for value in (1,2))
@@ -355,7 +354,7 @@ class LatinHyperCubeSuiteBuilder(SuiteBuilder):
                 ):
                     super().__init__(name, paramType, bounds)
 
-                def __call__(self, cs, bp, geom):
+                def __call__(self, cs, bp):
                     ...
 
         If the modifier is discrete then bounds specifies a list of options

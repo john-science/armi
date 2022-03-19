@@ -47,7 +47,6 @@ from armi import runLog
 from armi import interfaces
 from armi.cli import reportsEntryPoint
 from armi.reactor import blueprints
-from armi.reactor import systemLayoutInput
 from armi.reactor import reactors
 from armi.bookkeeping.db import compareDatabases
 from armi.utils import pathTools
@@ -70,7 +69,7 @@ class Case:
     other cases and be collected into :py:class:`armi.cases.suite.CaseSuite`\ s.
     """
 
-    def __init__(self, cs, caseSuite=None, bp=None, geom=None):
+    def __init__(self, cs, caseSuite=None, bp=None):
         """
         Initialize a Case from user input.
 
@@ -89,10 +88,6 @@ class Case:
             :py:class:`armi.reactor.blueprints.Blueprints` object containing the assembly
             definitions and other information. If not supplied, it will be loaded from the
             ``cs`` as needed.
-
-        geom : SystemLayoutInput, optional
-            SystemLayoutInput for this case. If not supplied, it will be loaded from the ``cs`` as
-            needed.
         """
         self._startTime = time.time()
         self._caseSuite = caseSuite
@@ -106,10 +101,9 @@ class Case:
 
         # NOTE: in order to prevent slow submission times for loading massively large
         # blueprints (e.g. certain computer-generated input files),
-        # self.bp and self.geom can be None.
+        # self.bp can be None.
         self.cs = cs
         self._bp = bp
-        self._geom = geom
 
         # this is used in parameter sweeps
         self._independentVariables = {}
@@ -151,23 +145,6 @@ class Case:
     @bp.setter
     def bp(self, bp):
         self._bp = bp
-
-    @property
-    def geom(self):
-        """
-        Geometry object for this Case.
-
-        Notes
-        -----
-        This property allows lazy loading.
-        """
-        if self._geom is None:
-            self._geom = systemLayoutInput.SystemLayoutInput.loadFromCs(self.cs)
-        return self._geom
-
-    @geom.setter
-    def geom(self, geom):
-        self._geom = geom
 
     @property
     def dependencies(self):
@@ -572,18 +549,18 @@ class Case:
 
         fromPath = lambda fname: pathTools.armiAbsPath(self.cs.inputDirectory, fname)
 
-        for inputFileSetting in ["loadingFile", "geomFile"]:
-            fileName = self.cs[inputFileSetting]
-            if fileName:
-                pathTools.copyOrWarn(
-                    inputFileSetting,
-                    fromPath(fileName),
-                    os.path.join(clone.cs.inputDirectory, fileName),
-                )
-            else:
-                runLog.warning(
-                    "skipping {}, there is no file specified".format(inputFileSetting)
-                )
+        inputFileSetting = "loadingFile"
+        fileName = self.cs[inputFileSetting]
+        if fileName:
+            pathTools.copyOrWarn(
+                inputFileSetting,
+                fromPath(fileName),
+                os.path.join(clone.cs.inputDirectory, fileName),
+            )
+        else:
+            runLog.warning(
+                "skipping {}, there is no file specified".format(inputFileSetting)
+            )
 
         with open(self.cs["loadingFile"], "r") as f:
             # The root for handling YAML includes is relative to the YAML file, not the
@@ -674,8 +651,7 @@ class Case:
 
         Notes
         -----
-        This will rename the ``loadingFile`` and ``geomFile`` to be ``title-blueprints + '.yaml'`` and
-        ``title + '-geom.yaml'`` respectively.
+        This will rename the ``loadingFile`` to be ``title-blueprints + '.yaml'``.
 
         See Also
         --------
@@ -684,21 +660,17 @@ class Case:
 
         clone
             Similar to this but doesn't let you write out new/modified
-            geometry or blueprints objects
+            blueprints objects
         """
         with ForcedCreationDirectoryChanger(
             self.cs.inputDirectory, dumpOnException=False
         ):
-            # trick: these seemingly no-ops load the bp and geom via properties if
+            # trick: these seemingly no-ops load the bp via properties if
             # they are not yet initialized.
             self.bp  # pylint: disable=pointless-statement
-            self.geom  # pylint: disable=pointless-statement
 
             newSettings = {}
             newSettings["loadingFile"] = self.title + "-blueprints.yaml"
-            if self.geom:
-                newSettings["geomFile"] = self.title + "-geom.yaml"
-                self.geom.writeGeom(newSettings["geomFile"])
 
             if self.independentVariables:
                 newSettings["independentVariables"] = [

@@ -29,7 +29,6 @@ import h5py
 from armi import __version__ as version
 from armi import getApp, runLog, utils
 from armi.reactor import geometry
-from armi.reactor import systemLayoutInput
 from armi.scripts.migration.base import DatabaseMigration
 
 
@@ -129,7 +128,6 @@ def _visit(newDB, preCollection, name, dataset):
 def _preCollector(oldDB):
     preCollection = {}
     preCollection.update(_collectParamRenames())
-    preCollection.update(_collectSymmetry(oldDB))
     return preCollection
 
 
@@ -168,15 +166,6 @@ def _updateParams(newDB, preCollection, name, dataset):
 
 def _collectParamRenames():
     return {"paramRenames": getApp().getParamRenames()}
-
-
-def _collectSymmetry(oldDB):
-    """Read symmetry and geomType off old-style geometry input str in DB."""
-    geomPath = "/inputs/geomFile"
-    if geomPath in oldDB:
-        geom = systemLayoutInput.SystemLayoutInput()
-        geom.readGeomFromStream(io.StringIO(oldDB["inputs/geomFile"][()]))
-    return {"symmetry": geom.symmetry, "geomType": geom.geomType}
 
 
 def _applyRenames(newDB, renames, name, dataset):

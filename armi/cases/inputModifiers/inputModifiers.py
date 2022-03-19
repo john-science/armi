@@ -21,7 +21,7 @@ class InputModifier:
     (This class is abstract.)
 
     Subclasses must implement a ``__call__`` method accepting a ``CaseSettings``,
-    ``Blueprints``, and ``SystemLayoutInput``.
+    and ``Blueprints``.
 
     The class attribute ``FAIL_IF_AFTER`` should be a tuple defining what, if any,
     modifications this should fail if performed after. For example, one should not
@@ -49,7 +49,7 @@ class InputModifier:
             independentVariable = {}
         self.independentVariable = independentVariable
 
-    def __call__(self, cs, bp, geom):
+    def __call__(self, cs, bp):
         """Perform the desired modifications to input objects."""
         raise NotImplementedError
 
@@ -61,7 +61,7 @@ class SamplingInputModifier(InputModifier):
     (This class is abstract.)
 
     Subclasses must implement a ``__call__`` method accepting a ``CaseSettings``,
-    ``Blueprints``, and ``SystemLayoutInput``.
+    and ``Blueprints``.
 
     This is a modified version of the InputModifier abstract class that imposes
     structure for parameters in a design space that will be sampled by a
@@ -95,14 +95,14 @@ class SamplingInputModifier(InputModifier):
         self.paramType = paramType
         self.bounds = bounds
 
-    def __call__(self, cs, blueprints, geom):
+    def __call__(self, cs, blueprints):
         """Perform the desired modifications to input objects."""
         raise NotImplementedError
 
 
 class FullCoreModifier(InputModifier):
     """
-    Grow the SystemLayoutInput to from a symmetric core to a full core.
+    Grow the Blueprint to from a symmetric core to a full core.
 
     Notes
     -----
@@ -115,15 +115,12 @@ class FullCoreModifier(InputModifier):
     grids to full core themself.
     """
 
-    def __call__(self, cs, bp, geom):
-        """Core might be on a geom object or a grid blueprint"""
-        if geom:
-            geom.growToFullCore()
-        else:
-            coreBp = bp.gridDesigns["core"]
-            coreBp.expandToFull()
+    def __call__(self, cs, bp):
+        """Core might be on a grid blueprint"""
+        coreBp = bp.gridDesigns["core"]
+        coreBp.expandToFull()
 
-        return cs, bp, geom
+        return cs, bp
 
 
 class SettingsModifier(InputModifier):
@@ -136,9 +133,9 @@ class SettingsModifier(InputModifier):
         self.settingName = settingName
         self.value = value
 
-    def __call__(self, cs, bp, geom):
+    def __call__(self, cs, bp):
         cs = cs.modified(newSettings={self.settingName: self.value})
-        return cs, bp, geom
+        return cs, bp
 
 
 class MultiSettingModifier(InputModifier):
@@ -158,13 +155,13 @@ class MultiSettingModifier(InputModifier):
         InputModifier.__init__(self, independentVariable=settingVals)
         self.settings = settingVals
 
-    def __call__(self, cs, bp, geom):
+    def __call__(self, cs, bp):
         newSettings = {}
         for name, val in self.settings.items():
             newSettings[name] = val
 
         cs = cs.modified(newSettings=newSettings)
-        return cs, bp, geom
+        return cs, bp
 
 
 class BluePrintBlockModifier(InputModifier):
@@ -177,7 +174,7 @@ class BluePrintBlockModifier(InputModifier):
         self.dimension = dimension
         self.value = value
 
-    def __call__(self, cs, bp, geom):
+    def __call__(self, cs, bp):
         # parse block
         for blockDesign in bp.blockDesigns:
             if blockDesign.name == self.block:
@@ -186,6 +183,6 @@ class BluePrintBlockModifier(InputModifier):
                     if componentDesign.name == self.component:
                         # set new value
                         setattr(componentDesign, self.dimension, self.value)
-                        return cs, bp, geom
+                        return cs, bp
 
-        return cs, bp, geom
+        return cs, bp

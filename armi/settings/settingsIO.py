@@ -35,7 +35,6 @@ from armi.meta import __version__ as version
 from armi import context
 from armi.settings.setting import Setting
 from armi.settings import settingsRules
-from armi.reactor import systemLayoutInput
 from armi.utils.customExceptions import (
     InvalidSettingsFileError,
     SettingException,
@@ -220,6 +219,7 @@ class SettingsReader:
         if handleInvalids:
             self._checkInvalidSettings()
 
+    # TODO: JOHN! CAN I JUST NUKE XML Settings too???
     def _readXml(self, stream):
         """
         Read user settings from XML stream.
@@ -236,15 +236,9 @@ class SettingsReader:
         if settingRoot.tag != self.rootTag:
             # checks to make sure the right kind of settings XML file
             # is being applied to the right class
-            if settingRoot.tag == systemLayoutInput.SystemLayoutInput.ROOT_TAG:
-                customMsg = (
-                    "\nSettings file appears to be a reactor geometry file. "
-                    "Please provide a valid settings file."
-                )
-            else:
-                customMsg = '\nRoot tag "{}" does not match expected value "{}"'.format(
-                    settingRoot.tag, self.rootTag
-                )
+            customMsg = '\nRoot tag "{}" does not match expected value "{}"'.format(
+                settingRoot.tag, self.rootTag
+            )
             raise InvalidSettingsFileError(self.inputPath, customMsgEnd=customMsg)
 
         for settingElement in list(settingRoot):

@@ -41,14 +41,14 @@ class NeutronicConvergenceModifier(inputModifiers.InputModifier):
                 "than 1e-2 (got {})".format(value)
             )
 
-    def __call__(self, cs, bp, geom):
+    def __call__(self, cs, bp):
         newSettings = {}
         newSettings["epsFSAvg"] = self.value * 100
         newSettings["epsFSPoint"] = self.value * 100
         newSettings["epsEig"] = self.value
         cs = cs.modified(newSettings=newSettings)
 
-        return cs, bp, geom
+        return cs, bp
 
 
 class NeutronicMeshsSizeModifier(inputModifiers.InputModifier):
@@ -74,10 +74,10 @@ class NeutronicMeshsSizeModifier(inputModifiers.InputModifier):
             )
         self.multFactor = multFactor
 
-    def __call__(self, cs, bp, geom):
+    def __call__(self, cs, bp):
         for assemDesign in bp.assemDesigns:
             assemDesign.axialMeshPoints = [
                 ax * self.multFactor for ax in assemDesign.axialMeshPoints
             ]
 
-        return cs, bp, geom
+        return cs, bp

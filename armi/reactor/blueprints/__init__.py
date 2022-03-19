@@ -92,7 +92,6 @@ from armi.nucDirectory import elements
 from armi.nucDirectory import nuclideBases
 from armi.reactor import assemblies
 from armi.reactor import geometry
-from armi.reactor import systemLayoutInput
 from armi.scripts import migration
 from armi.utils import textProcessors
 
@@ -535,6 +534,7 @@ class Blueprints(yamlize.Object, metaclass=_BlueprintsPluginCollector):
         return super().load(stream, Loader=loader)
 
 
+# TODO: JOHN! FIX OR NUKE???
 def migrate(bp: Blueprints, cs):
     """
     Apply migrations to the input structure.
@@ -598,8 +598,3 @@ def migrate(bp: Blueprints, cs):
 
     # Someday: write out the migrated file. At the moment this messes up the case
     # title and doesn't yet have the other systems in place so this isn't the right place.
-
-
-#     cs.writeToXMLFile(cs.caseTitle + '.migrated.xml')
-#     with open(os.path.split(cs['loadingFile'])[0] + '.migrated.' + '.yaml', 'w') as loadingFile:
-#         blueprints.Blueprints.dump(bp, loadingFile)

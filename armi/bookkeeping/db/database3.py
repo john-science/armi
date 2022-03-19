@@ -101,7 +101,6 @@ from armi.reactor.composites import ArmiObject
 from armi.reactor import grids
 from armi.bookkeeping.db.typedefs import History, Histories
 from armi.bookkeeping.db import database
-from armi.reactor import systemLayoutInput
 from armi.utils.textProcessors import resolveMarkupInclusions
 from armi.nucDirectory import nuclideBases
 from armi.settings.fwSettings.databaseSettings import (
@@ -226,18 +225,7 @@ class DatabaseInterface(interfaces.Interface):
             )
         self._db = Database3(self._dbPath, "w")
         self._db.open()
-
-        # Grab geomString here because the DB-level has no access to the reactor or
-        # blueprints or anything.
-        # There's not always a geomFile; we are moving towards the core grid definition
-        # living in the blueprints themselves. In this case, the db doesnt need to store
-        # a geomFile at all.
-        if self.cs["geomFile"]:
-            with open(os.path.join(self.cs.inputDirectory, self.cs["geomFile"])) as f:
-                geomString = f.read()
-        else:
-            geomString = ""
-        self._db.writeInputsToDB(self.cs, geomString=geomString)
+        self._db.writeInputsToDB(self.cs)
 
     def interactEveryNode(self, cycle, node):
         """
@@ -804,16 +792,7 @@ class Database3(database.Database):
         bp = Blueprints.load(stream)
         return bp
 
-    def loadGeometry(self):
-        """
-        This is primarily just used for migrations.
-        The "geometry files" were replaced by ``systems:`` and ``grids:`` sections of ``Blueprints``.
-        """
-        geom = systemLayoutInput.SystemLayoutInput()
-        geom.readGeomFromStream(io.StringIO(self.h5db["inputs/geomFile"].asstr()[()]))
-        return geom
-
-    def writeInputsToDB(self, cs, csString=None, geomString=None, bpString=None):
+    def writeInputsToDB(self, cs, csString=None, bpString=None):
         """
         Write inputs into the database based the CaseSettings.
 
@@ -824,7 +803,7 @@ class Database3(database.Database):
         Notes
         -----
         This is hard-coded to read the entire file contents into memory and write that
-        directly into the database. We could have the cs/blueprints/geom write to a
+        directly into the database. We could have the cs/blueprints write to a
         string, however the ARMI log file contains a hash of each files' contents. In
         the future, we should be able to reproduce a calculation with confidence that
         the inputs are identical.
@@ -853,13 +832,11 @@ class Database3(database.Database):
                 bpString = ""
 
         self.h5db["inputs/settings"] = csString
-        self.h5db["inputs/geomFile"] = geomString or ""
         self.h5db["inputs/blueprints"] = bpString
 
     def readInputsFromDB(self):
         return (
             self.h5db["inputs/settings"].asstr()[()],
-            self.h5db["inputs/geomFile"].asstr()[()],
             self.h5db["inputs/blueprints"].asstr()[()],
         )
 
