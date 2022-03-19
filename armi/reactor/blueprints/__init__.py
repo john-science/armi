@@ -565,4 +565,3 @@ def migrate(bp: Blueprints, cs):
             "Update inputs."
         )
     bp.systemDesigns["core"] = SystemBlueprint("core", "core", Triplet())
-

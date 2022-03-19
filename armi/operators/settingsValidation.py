@@ -160,7 +160,6 @@ class Inspector:
         self.geomType = None
         self.coreSymmetry = None
         self._inspectBlueprints()
-        self._setGeomType()
         self._inspectSettings()
 
         # Gather and attach validators from all plugins

@@ -107,13 +107,10 @@ def writeWelcomeHeaders(o, cs):
             includedBlueprints = []
 
         inputInfo = []
-        inputFiles = (
-            [
-                ("Case Settings", cs.caseTitle + ".yaml"),
-                ("Blueprints", cs["loadingFile"]),
-            ]
-            + [("Included blueprints", inclBp) for inclBp in includedBlueprints]
-        )
+        inputFiles = [
+            ("Case Settings", cs.caseTitle + ".yaml"),
+            ("Blueprints", cs["loadingFile"]),
+        ] + [("Included blueprints", inclBp) for inclBp in includedBlueprints]
 
         activeInterfaces = interfaces.getActiveInterfaceInfo(cs)
         for klass, kwargs in activeInterfaces:
