@@ -80,8 +80,6 @@ class TestReactorBlueprints(unittest.TestCase):
         reactor = reactors.Reactor(cs.caseTitle, bp)
         core = bp.systemDesigns["core"].construct(cs, bp, reactor)
         sfp = bp.systemDesigns["sfp"].construct(cs, bp, reactor)
-        for fn in fnames:
-            os.remove(fn)
 
         return core, sfp
 

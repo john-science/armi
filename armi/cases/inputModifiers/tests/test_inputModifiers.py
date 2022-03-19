@@ -196,9 +196,7 @@ class TestSettingsModifiers(unittest.TestCase):
         with self.assertRaises(ValueError):
             _ = neutronicsModifiers.NeutronicConvergenceModifier(1e-2 + 1e-15)
 
-        cs, _, _ = neutronicsModifiers.NeutronicConvergenceModifier(1e-2)(
-            cs, None, None
-        )
+        cs, _ = neutronicsModifiers.NeutronicConvergenceModifier(1e-2)(cs, None)
         self.assertAlmostEqual(cs["epsEig"], 1e-2)
         self.assertAlmostEqual(cs["epsFSAvg"], 1.0)
         self.assertAlmostEqual(cs["epsFSPoint"], 1.0)
@@ -222,10 +220,9 @@ class TestFullCoreModifier(unittest.TestCase):
         case = cases.Case(cs=cs)
         mod = inputModifiers.FullCoreModifier()
         self.assertEqual(case.bp.gridDesigns["core"].symmetry, "third periodic")
-        case, case.bp, _ = mod(case, case.bp, None)
+        case, case.bp = mod(case, case.bp)
         self.assertEqual(case.bp.gridDesigns["core"].symmetry, "full")
 
 
 if __name__ == "__main__":
-    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
