@@ -1461,7 +1461,7 @@ class Block_TestCase(unittest.TestCase):
         numFE56 = self.block.getNumberOfAtoms("FE56")
         numU235 = self.block.getNumberOfAtoms("U235")
         for c in self.block:
-            c.setTemperature(800)
+            c.setTemperature(770)
         hasNegativeArea = any(c.getArea() < 0 for c in self.block)
         self.assertTrue(hasNegativeArea)
         self.block.getVolumeFractions()  # sets coolant area

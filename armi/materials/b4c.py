@@ -55,7 +55,7 @@ class B4C(material.Material):
 
     def setNewMassFracsFromMassEnrich(self, massEnrichment):
         r"""
-        Calculate the mass fractions for a given  mass enrichment and set it on any parent.
+        Calculate the mass fractions for a given mass enrichment and set it on any parent.
 
         Parameters
         ----------
@@ -125,7 +125,6 @@ class B4C(material.Material):
 
         total=55.2547 g.
         Mass fractions are computed from this.
-
         """
         massEnrich = self.getMassEnrichmentFromNumEnrich(naturalB10NumberFraction=0.199)
 
@@ -156,9 +155,7 @@ class B4C(material.Material):
         )
 
     def density(self, Tk: float = None, Tc: float = None) -> float:
-        """
-        mass density
-        """
+        """mass density"""
         density = material.Material.density(self, Tk, Tc)
         theoreticalDensityFrac = self.p.theoreticalDensityFrac
         if theoreticalDensityFrac is None:
@@ -173,7 +170,9 @@ class B4C(material.Material):
     def linearExpansionPercent(self, Tk: float = None, Tc: float = None) -> float:
         """Boron carbide expansion. Very preliminary"""
         Tc = getTc(Tc, Tk)
-        self.checkTempRange(25, 500, Tc, "linear expansion percent")
+        self.checkTempRange(
+            25, 600, Tc, "linear expansion percent"
+        )  # TODO: JOHN! TESTING!
         deltaT = Tc - 25
         dLL = deltaT * 4.5e-6 * 100  # percent
         return dLL

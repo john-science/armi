@@ -107,7 +107,7 @@ class MagnesiumOxide_TestCase(_Material_Test, unittest.TestCase):
         delta = ref * 0.05
         self.assertAlmostEqual(cur, ref, delta=delta)
 
-        cur = self.mat.density(1390)
+        cur = self.mat.density(1200)
         ref = 3.418434
         delta = ref * 0.05
         self.assertAlmostEqual(cur, ref, delta=delta)
@@ -209,8 +209,8 @@ class Sodium_TestCase(_Material_Test, unittest.TestCase):
     MAT_CLASS = materials.Sodium
 
     def test_density(self):
-        cur = self.mat.density(300)
-        ref = 0.941
+        cur = self.mat.density(372.15)
+        ref = 0.925
         delta = ref * 0.001
         self.assertAlmostEqual(cur, ref, delta=delta)
 
@@ -221,7 +221,7 @@ class Sodium_TestCase(_Material_Test, unittest.TestCase):
 
     def test_specificVolumeLiquid(self):
         cur = self.mat.specificVolumeLiquid(300)
-        ref = 0.001062
+        ref = 0.004566
         delta = ref * 0.001
         self.assertAlmostEqual(cur, ref, delta=delta)
 
@@ -231,8 +231,8 @@ class Sodium_TestCase(_Material_Test, unittest.TestCase):
         self.assertAlmostEqual(cur, ref, delta=delta)
 
     def test_enthalpy(self):
-        cur = self.mat.enthalpy(300)
-        ref = 107518.523
+        cur = self.mat.enthalpy(400)
+        ref = 246661.58
         delta = ref * 0.001
         self.assertAlmostEqual(cur, ref, delta=delta)
 
@@ -242,13 +242,13 @@ class Sodium_TestCase(_Material_Test, unittest.TestCase):
         self.assertAlmostEqual(cur, ref, delta=delta)
 
     def test_thermalConductivity(self):
-        cur = self.mat.thermalConductivity(300)
-        ref = 95.1776
+        cur = self.mat.thermalConductivity(400)
+        ref = 87.224
         delta = ref * 0.001
         self.assertAlmostEqual(cur, ref, delta=delta)
 
-        cur = self.mat.thermalConductivity(1700)
-        ref = 32.616
+        cur = self.mat.thermalConductivity(1500)
+        ref = 38.24675
         delta = ref * 0.001
         self.assertAlmostEqual(cur, ref, delta=delta)
 
@@ -655,8 +655,8 @@ class LeadBismuth_TestCase(_Material_Test, unittest.TestCase):
         self.assertAlmostEqual(expectedDeltaT, actualDeltaT)
 
     def test_dynamicVisc(self):
-        ref = self.mat.dynamicVisc(Tc=100)
-        cur = 0.0037273
+        ref = self.mat.dynamicVisc(Tc=150)
+        cur = 0.0029355
         self.assertAlmostEqual(ref, cur, delta=ref * 0.001)
 
         ref = self.mat.dynamicVisc(Tc=200)
@@ -1269,16 +1269,14 @@ class HastelloyN_TestCase(_Material_Test, unittest.TestCase):
     MAT_CLASS = materials.HastelloyN
 
     def test_thermalConductivity(self):
-        TcList = [100, 200, 300, 400, 500, 600, 700, 800]
+        TcList = [200, 300, 400, 500, 600, 700]
         refList = [
-            12.280014,
             13.171442,
             14.448584,
             16.11144,
             18.16001,
             20.594294,
             23.414292,
-            26.620004,
         ]
 
         for Tc, val in zip(TcList, refList):

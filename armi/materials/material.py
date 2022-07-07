@@ -36,9 +36,6 @@ from armi.materials import materialParameters
 from armi.utils.units import getTk, getTc
 from armi.utils import densityTools
 
-# globals
-FAIL_ON_RANGE = False
-
 
 class Material(composites.Leaf):
     """
@@ -554,22 +551,13 @@ class Material(composites.Leaf):
 
         label : str
             The name of the function or property that is being checked.
-
         """
-
         if not minV <= val <= maxV:
             msg = "Temperature {0} out of range ({1} to {2}) for {3} {4}".format(
                 val, minV, maxV, self.name, label
             )
-            if FAIL_ON_RANGE or numpy.isnan(val):
-                runLog.error(msg)
-                raise ValueError
-            else:
-                runLog.warning(
-                    msg,
-                    single=True,
-                    label="T out of bounds for {} {}".format(self.name, label),
-                )
+            runLog.error(msg)
+            raise ValueError(msg)
 
     def densityTimesHeatCapacity(self, Tk: float = None, Tc: float = None) -> float:
         r"""

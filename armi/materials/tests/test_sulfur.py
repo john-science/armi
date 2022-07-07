@@ -38,15 +38,15 @@ class Sulfur_TestCase(_Material_Test, unittest.TestCase):
         self.Sulfur_both.applyInputParams(sulfur_density_frac=0.5, TD_frac=0.4)
 
     def test_sulfur_density_frac(self):
-        ref = self.mat.density(500)
+        ref = self.mat.density(400)
 
-        reduced = self.Sulfur_sulfur_density_frac.density(500)
+        reduced = self.Sulfur_sulfur_density_frac.density(400)
         self.assertAlmostEqual(ref * 0.5, reduced)
 
-        reduced = self.Sulfur_TD_frac.density(500)
+        reduced = self.Sulfur_TD_frac.density(400)
         self.assertAlmostEqual(ref * 0.4, reduced)
 
-        reduced = self.Sulfur_both.density(500)
+        reduced = self.Sulfur_both.density(400)
         self.assertAlmostEqual(ref * 0.4, reduced)
 
 

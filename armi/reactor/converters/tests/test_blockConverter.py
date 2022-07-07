@@ -40,14 +40,14 @@ class TestBlockConverter(unittest.TestCase):
         self._test_dissolve(loadTestBlock(), "wire", "coolant")
         hotBlock = loadTestBlock(cold=False)
         self._test_dissolve(hotBlock, "wire", "coolant")
-        hotBlock = self._perturbTemps(hotBlock, "wire", 127, 800)
+        hotBlock = self._perturbTemps(hotBlock, "wire", 127, 700)
         self._test_dissolve(hotBlock, "wire", "coolant")
 
     def test_dissolveLinerIntoClad(self):
         self._test_dissolve(loadTestBlock(), "outer liner", "clad")
         hotBlock = loadTestBlock(cold=False)
         self._test_dissolve(hotBlock, "outer liner", "clad")
-        hotBlock = self._perturbTemps(hotBlock, "outer liner", 127, 800)
+        hotBlock = self._perturbTemps(hotBlock, "outer liner", 127, 700)
         self._test_dissolve(hotBlock, "outer liner", "clad")
 
     def _perturbTemps(self, block, cName, tCold, tHot):
@@ -289,5 +289,4 @@ def _buildJoyoFuel():
 
 
 if __name__ == "__main__":
-    #     import sys;sys.argv = ['', 'TestBlockConverter.test_convertHexWithFuelDriver']
     unittest.main()

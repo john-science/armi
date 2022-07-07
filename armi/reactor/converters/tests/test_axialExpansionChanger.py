@@ -189,7 +189,7 @@ class TestAxialExpansionHeight(Base, unittest.TestCase):
             self._getConservationMetrics(self.a)
             self.axialMeshLocs[idt, :] = self.a.getAxialMesh()
 
-    def test_AssemblyAxialExpansionHeight(self):
+    def test_assemblyAxialExpansionHeight(self):
         """test the axial expansion gives correct heights for component-based expansion"""
         for idt in range(self.temp.tempSteps):
             for ib, b in enumerate(self.a):
@@ -203,7 +203,7 @@ class TestAxialExpansionHeight(Base, unittest.TestCase):
                     ),
                 )
 
-    def test_AxialMesh(self):
+    def test_axialMesh(self):
         """test that mesh aligns with block tops for component-based expansion"""
         for idt in range(self.temp.tempSteps):
             for ib, b in enumerate(self.a):
@@ -316,9 +316,9 @@ class TestConservation(Base, unittest.TestCase):
         for b in self.a:
             self.oldMass[b.name] = 0.0
 
-        # do the expansion and store mass and density info
+        # do the expansion and store mass and density info (temps in Celcius)
         self.temp = Temperature(
-            self.a.getTotalHeight(), coldTemp=1.0, hotInletTemp=1000.0
+            self.a.getTotalHeight(), coldTemp=20.0, hotInletTemp=1000.0
         )
         for idt in range(self.temp.tempSteps):
             self.obj.performThermalAxialExpansion(
@@ -326,7 +326,7 @@ class TestConservation(Base, unittest.TestCase):
             )
             self._getConservationMetrics(self.a)
 
-    def test_ExpansionContractionConservation(self):
+    def test_expansionContractionConservation(self):
         """expand all components and then contract back to original state
 
         Notes
@@ -359,7 +359,7 @@ class TestConservation(Base, unittest.TestCase):
             msg="Axial mesh is not the same after the expansion and contraction!",
         )
 
-    def test_TargetComponentMassConservation(self):
+    def test_targetComponentMassConservation(self):
         """tests mass conservation for target components"""
         for idt in range(self.temp.tempSteps):
             for b in self.a[:-1]:  # skip the dummy sodium block
@@ -378,7 +378,7 @@ class TestConservation(Base, unittest.TestCase):
                     )
                 self.oldMass[b.name] = self.massAndDens[b.name][idt][0]
 
-    def test_SteelConservation(self):
+    def test_steelConservation(self):
         """tests mass conservation for total assembly steel
 
         Component list defined by, Steel_Component_List, in GetSteelMass()
@@ -391,7 +391,7 @@ class TestConservation(Base, unittest.TestCase):
                 msg="Conservation of steel mass failed on time step {0:d}".format(idt),
             )
 
-    def test_NoMovementACLP(self):
+    def test_noMovementACLP(self):
         """ensures that above core load pad (ACLP) does not move during fuel-only expansion"""
         # build test assembly with ACLP
         assembly = HexAssembly("testAssemblyType")
@@ -480,7 +480,7 @@ class TestExceptions(Base, unittest.TestCase):
             the_exception = cm.exception
             self.assertEqual(the_exception.error_code, 3)
 
-    def test_AssemblyAxialExpansionException(self):
+    def test_assemblyAxialExpansionException(self):
         """test that negative height exception is caught"""
         temp = Temperature(self.a.getTotalHeight(), numTempGridPts=11, tempSteps=10)
         with self.assertRaises(ArithmeticError) as cm:
@@ -818,12 +818,12 @@ class TestLinkage(unittest.TestCase):
             componentTypesToTest, True, "test_thinAnnularPinOverlappingWithThickAnnulus"
         )
 
-    def test_AnnularHexOverlappingThickAnnularHex(self):
+    def test_annularHexOverlappingThickAnnularHex(self):
         componentTypesToTest = {
             Hexagon: [{"op": 1.0, "ip": 0.8}, {"op": 1.2, "ip": 0.8}]
         }
         self.runTest(
-            componentTypesToTest, True, "test_AnnularHexOverlappingThickAnnularHex"
+            componentTypesToTest, True, "test_annularHexOverlappingThickAnnularHex"
         )
 
     def test_liquids(self):
@@ -941,7 +941,7 @@ class FakeMatException(materials.ht9.HT9):
     Notes
     -----
     - the only difference between this and `class Fake(HT9)` above is that the thermal expansion factor
-      is higher to ensure that a negative block height is caught in TestExceptions:test_AssemblyAxialExpansionException.
+      is higher to ensure that a negative block height is caught in TestExceptions:test_assemblyAxialExpansionException.
     """
 
     name = "FakeMatException"

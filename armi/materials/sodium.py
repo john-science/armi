@@ -65,8 +65,7 @@ class Sodium(material.Fluid):
         Tk = getTk(Tc, Tk)
         Tc = getTc(Tc, Tk)
         if check_range:
-            self.checkTempRange(97.85, 2230.55, Tc, "density")
-
+            self.checkTempRange(20, 2230.55, Tc, "density")  # TODO: JOHN! TESTING!
         if check_range and (Tc is not None) and (Tc <= 97.72):
             runLog.warning(
                 "Sodium frozen at Tc: {0}".format(Tc),
@@ -75,10 +74,12 @@ class Sodium(material.Fluid):
             )
 
         critDens = 219  # critical density
-        f = 275.32  #
+        f = 275.32
         g = 511.58
         h = 0.5
         Tcrit = 2503.7  # critical temperature
+        if Tc <= 97.72:
+            return critDens / 1000.0  # TODO: JOHN TESTING!
         return (
             critDens
             + f * (1 - (Tc + 273.15) / Tcrit)
@@ -126,10 +127,9 @@ class Sodium(material.Fluid):
         -------
         thermalConductivity : float
             thermal conductivity of Sodium (W/m-K)
-
         """
         Tc = getTc(Tc, Tk)
-        self.checkTempRange(3715, 1500, Tk, "thermal conductivity")
+        self.checkTempRange(371.5, 1500, Tk, "thermal conductivity")
         thermalConductivity = (
             124.67 - 0.11381 * Tk + 5.5226e-5 * Tk ** 2 - 1.1842e-8 * Tk ** 3
         )
