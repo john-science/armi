@@ -113,7 +113,7 @@ def getPowerFractions(cs):
         )
 
         return [
-            [value] * (cs["burnSteps"] if cs["burnSteps"] != None else 0)
+            [value] * (cs["burnSteps"] if cs["burnSteps"] is not None else 0)
             for value in valuePerCycle
         ]
 
@@ -179,7 +179,7 @@ def getAvailabilityFactors(cs):
             if cs["availabilityFactors"] not in [None, []]
             else (
                 [cs["availabilityFactor"]] * cs["nCycles"]
-                if cs["availabilityFactor"] != None
+                if cs["availabilityFactor"] is not None
                 else [1]
             )
         )
@@ -231,7 +231,7 @@ def _getStepAndCycleLengths(cs):
             if cs["cycleLengths"] not in [None, []]
             else (
                 [cs["cycleLength"]] * cs["nCycles"]
-                if cs["cycleLength"] != None
+                if cs["cycleLength"] is not None
                 else [0]
             )
         )
@@ -369,10 +369,14 @@ def getCycleNodeFromCumulativeStep(timeStepNum, cs):
         raise ValueError(f"Cumulative time step cannot be less than 1.")
 
     cSteps = 0  # cumulative steps
-    for i in range(len(stepsPerCycle)):
-        cSteps += stepsPerCycle[i]
+    for i, step in enumerate(stepsPerCycle):
+        cSteps += step
         if timeStepNum <= cSteps:
-            return (i, timeStepNum - (cSteps - stepsPerCycle[i]) - 1)
+            return (i, timeStepNum - (cSteps - step) - 1)
+
+    # otherwise, return the highest step number
+    i = len(stepsPerCycle) - 1
+    return (i, timeStepNum - (cSteps - stepsPerCycle[i]) - 1)
 
 
 def getCycleNodeFromCumulativeNode(timeNodeNum, cs):
@@ -402,10 +406,14 @@ def getCycleNodeFromCumulativeNode(timeNodeNum, cs):
         raise ValueError(f"Cumulative time node cannot be less than 0.")
 
     cNodes = 0  # cumulative nodes
-    for i in range(len(nodesPerCycle)):
-        cNodes += nodesPerCycle[i]
+    for i, node in enumerate(nodesPerCycle):
+        cNodes += node
         if timeNodeNum < cNodes:
-            return (i, timeNodeNum - (cNodes - nodesPerCycle[i]))
+            return (i, timeNodeNum - (cNodes - node))
+
+    # otherwise, return the highest step number
+    i = len(nodesPerCycle) - 1
+    return (i, timeNodeNum - (cNodes - nodesPerCycle[i]) - 1)
 
 
 def getNodesPerCycle(cs):
@@ -671,7 +679,6 @@ def list2str(strings, width=None, preStrings=None, fmt=None):
     fmt : str, optional
         The format to apply to each string, such as
         ' >4d', '^12.4E'.
-
     """
     if preStrings is None:
         preStrings = []
@@ -712,7 +719,6 @@ def createFormattedStrWithDelimiter(
         >>> createFormattedStrWithDelimiter(['hello', 'world', '1', '2', '3', '4'],
         ...     maxNumberOfValuesBeforeDelimiter=3, delimiter = '\n')
         "hello, world, 1, \n2, 3, \n4, 5\n"
-
     """
     formattedString = ""
     if not dataList:
@@ -841,6 +847,7 @@ def safeCopy(src: str, dst: str) -> None:
     runLog.extra("Copied {} -> {}".format(src, dst))
 
 
+# TODO: Global hackery - remove.
 # Allow us to check the copy operation is complete before continuing
 shutil_copy = shutil.copy
 shutil.copy = safeCopy

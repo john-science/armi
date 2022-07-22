@@ -303,13 +303,15 @@ def runActions(o, r, cs, actions, numPerNode=None, serial=False):
         return runActionsInSerial(o, r, cs, actions)
 
     useForComputation = [True] * context.MPI_SIZE
-    if numPerNode != None:
+    if numPerNode is None:
         if numPerNode < 1:
             raise ValueError("numPerNode must be >= 1")
+
         numThisNode = {nodeName: 0 for nodeName in context.MPI_NODENAMES}
         for rank, nodeName in enumerate(context.MPI_NODENAMES):
             useForComputation[rank] = numThisNode[nodeName] < numPerNode
             numThisNode[nodeName] += 1
+
     numBatches = int(
         math.ceil(
             len(actions) / float(len([rank for rank in useForComputation if rank]))
@@ -321,7 +323,8 @@ def runActions(o, r, cs, actions, numPerNode=None, serial=False):
         )
     )
 
-    queue = list(actions)  # create a new list.. we will use as a queue
+    # create a new list.. we will use as a queue
+    queue = list(actions)
     results = []
     batchNum = 0
     while queue:
@@ -564,7 +567,8 @@ class DistributeStateAction(MpiAction):
         # attach here so any interface actions use a properly-setup reactor.
         self.o.reattach(self.r, cs)  # sets r and cs
 
-    def _distributeParamAssignments(self):
+    @staticmethod
+    def _distributeParamAssignments():
         data = dict()
         if context.MPI_RANK == 0:
             data = {
@@ -637,7 +641,7 @@ class DistributeStateAction(MpiAction):
                     iNew = self.broadcast(None)
                     runLog.debug("Received {0}".format(iNew))
                     if iNew == "quit":
-                        return True  # signal the operator to break.
+                        return
                     self.o.removeInterface(iOld)
                     self.o.addInterface(iNew)
                     iNew.interactDistributeState()  # pylint: disable=no-member

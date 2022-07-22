@@ -233,137 +233,111 @@ settings:
     maxBurnStepsSimpleSolution = 3
 
     def setUp(self):
-        self.standaloneDetailedCS = Settings()
-        self.standaloneDetailedCS.loadFromString(self.detailedCyclesSettings)
+        self.detailedCS = Settings()
+        self.detailedCS.loadFromString(self.detailedCyclesSettings)
 
-        self.standaloneSimpleCS = Settings()
-        self.standaloneSimpleCS.loadFromString(self.simpleCyclesSettings)
+        self.simpleCS = Settings()
+        self.simpleCS.loadFromString(self.simpleCyclesSettings)
 
     def test_getPowerFractions(self):
         self.assertEqual(
-            getPowerFractions(self.standaloneDetailedCS),
-            self.powerFractionsDetailedSolution,
+            getPowerFractions(self.detailedCS), self.powerFractionsDetailedSolution
         )
 
         self.assertEqual(
-            getPowerFractions(self.standaloneSimpleCS),
-            self.powerFractionsSimpleSolution,
+            getPowerFractions(self.simpleCS), self.powerFractionsSimpleSolution
         )
 
     def test_getCycleNames(self):
         self.assertEqual(
-            getCycleNames(self.standaloneDetailedCS), self.cycleNamesDetailedSolution
+            getCycleNames(self.detailedCS), self.cycleNamesDetailedSolution
         )
 
-        self.assertEqual(
-            getCycleNames(self.standaloneSimpleCS), self.cycleNamesSimpleSolution
-        )
+        self.assertEqual(getCycleNames(self.simpleCS), self.cycleNamesSimpleSolution)
 
     def test_getAvailabilityFactors(self):
         self.assertEqual(
-            getAvailabilityFactors(self.standaloneDetailedCS),
+            getAvailabilityFactors(self.detailedCS),
             self.availabilityFactorsDetailedSolution,
         )
 
         self.assertEqual(
-            getAvailabilityFactors(self.standaloneSimpleCS),
+            getAvailabilityFactors(self.simpleCS),
             self.availabilityFactorsSimpleSolution,
         )
 
     def test_getStepLengths(self):
         self.assertEqual(
-            getStepLengths(self.standaloneDetailedCS),
-            self.stepLengthsDetailedSolution,
+            getStepLengths(self.detailedCS), self.stepLengthsDetailedSolution
         )
 
-        self.assertEqual(
-            getStepLengths(self.standaloneSimpleCS),
-            self.stepLengthsSimpleSolution,
-        )
+        self.assertEqual(getStepLengths(self.simpleCS), self.stepLengthsSimpleSolution)
 
     def test_getCycleLengths(self):
         self.assertEqual(
-            getCycleLengths(self.standaloneDetailedCS),
-            self.cycleLengthsDetailedSolution,
+            getCycleLengths(self.detailedCS), self.cycleLengthsDetailedSolution
         )
 
         self.assertEqual(
-            getCycleLengths(self.standaloneSimpleCS), self.cycleLengthsSimpleSolution
+            getCycleLengths(self.simpleCS), self.cycleLengthsSimpleSolution
         )
 
     def test_getBurnSteps(self):
-        self.assertEqual(
-            getBurnSteps(self.standaloneDetailedCS), self.burnStepsDetailedSolution
-        )
+        self.assertEqual(getBurnSteps(self.detailedCS), self.burnStepsDetailedSolution)
 
-        self.assertEqual(
-            getBurnSteps(self.standaloneSimpleCS), self.burnStepsSimpleSolution
-        )
+        self.assertEqual(getBurnSteps(self.simpleCS), self.burnStepsSimpleSolution)
 
     def test_getMaxBurnSteps(self):
         self.assertEqual(
-            getMaxBurnSteps(self.standaloneDetailedCS),
-            self.maxBurnStepsDetailedSolution,
+            getMaxBurnSteps(self.detailedCS), self.maxBurnStepsDetailedSolution
         )
 
         self.assertEqual(
-            getMaxBurnSteps(self.standaloneSimpleCS), self.maxBurnStepsSimpleSolution
+            getMaxBurnSteps(self.simpleCS), self.maxBurnStepsSimpleSolution
         )
 
     def test_getNodesPerCycle(self):
         self.assertEqual(
-            getNodesPerCycle(self.standaloneDetailedCS),
-            self.nodesPerCycleDetailedSolution,
+            getNodesPerCycle(self.detailedCS), self.nodesPerCycleDetailedSolution
         )
 
         self.assertEqual(
-            getNodesPerCycle(self.standaloneSimpleCS), self.nodesPerCycleSimpleSolution
+            getNodesPerCycle(self.simpleCS), self.nodesPerCycleSimpleSolution
         )
 
     def test_getCycleNodeFromCumulativeStep(self):
-        self.assertEqual(
-            getCycleNodeFromCumulativeStep(8, self.standaloneDetailedCS), (1, 4)
-        )
-        self.assertEqual(
-            getCycleNodeFromCumulativeStep(12, self.standaloneDetailedCS), (2, 3)
-        )
+        self.assertEqual(getCycleNodeFromCumulativeStep(8, self.detailedCS), (1, 4))
+        self.assertEqual(getCycleNodeFromCumulativeStep(12, self.detailedCS), (2, 3))
+        self.assertEqual(getCycleNodeFromCumulativeStep(99, self.detailedCS), (2, 90))
 
-        self.assertEqual(
-            getCycleNodeFromCumulativeStep(4, self.standaloneSimpleCS), (1, 0)
-        )
-        self.assertEqual(
-            getCycleNodeFromCumulativeStep(8, self.standaloneSimpleCS), (2, 1)
-        )
+        self.assertEqual(getCycleNodeFromCumulativeStep(4, self.simpleCS), (1, 0))
+        self.assertEqual(getCycleNodeFromCumulativeStep(8, self.simpleCS), (2, 1))
+        self.assertEqual(getCycleNodeFromCumulativeStep(99, self.simpleCS), (2, 92))
 
     def test_getCycleNodeFromCumulativeNode(self):
-        self.assertEqual(
-            getCycleNodeFromCumulativeNode(8, self.standaloneDetailedCS), (1, 4)
-        )
-        self.assertEqual(
-            getCycleNodeFromCumulativeNode(12, self.standaloneDetailedCS), (2, 2)
-        )
+        self.assertEqual(getCycleNodeFromCumulativeNode(8, self.detailedCS), (1, 4))
+        self.assertEqual(getCycleNodeFromCumulativeNode(12, self.detailedCS), (2, 2))
+        self.assertEqual(getCycleNodeFromCumulativeNode(99, self.detailedCS), (2, 88))
 
-        self.assertEqual(
-            getCycleNodeFromCumulativeNode(3, self.standaloneSimpleCS), (0, 3)
-        )
-        self.assertEqual(
-            getCycleNodeFromCumulativeNode(8, self.standaloneSimpleCS), (2, 0)
-        )
+        self.assertEqual(getCycleNodeFromCumulativeNode(3, self.simpleCS), (0, 3))
+        self.assertEqual(getCycleNodeFromCumulativeNode(8, self.simpleCS), (2, 0))
+        self.assertEqual(getCycleNodeFromCumulativeNode(99, self.simpleCS), (2, 90))
 
     def test_getPreviousTimeNode(self):
         with self.assertRaises(ValueError):
             getPreviousTimeNode(0, 0, "foo")
-        self.assertEqual(getPreviousTimeNode(1, 1, self.standaloneSimpleCS), (1, 0))
-        self.assertEqual(getPreviousTimeNode(1, 0, self.standaloneSimpleCS), (0, 3))
-        self.assertEqual(getPreviousTimeNode(1, 0, self.standaloneDetailedCS), (0, 3))
-        self.assertEqual(getPreviousTimeNode(2, 4, self.standaloneDetailedCS), (2, 3))
+
+        self.assertEqual(getPreviousTimeNode(1, 1, self.simpleCS), (1, 0))
+        self.assertEqual(getPreviousTimeNode(1, 0, self.simpleCS), (0, 3))
+        self.assertEqual(getPreviousTimeNode(1, 0, self.detailedCS), (0, 3))
+        self.assertEqual(getPreviousTimeNode(2, 4, self.detailedCS), (2, 3))
 
     def test_getCumulativeNodeNum(self):
-        self.assertEqual(getCumulativeNodeNum(2, 0, self.standaloneSimpleCS), 8)
-        self.assertEqual(getCumulativeNodeNum(1, 2, self.standaloneSimpleCS), 6)
+        self.assertEqual(getCumulativeNodeNum(2, 0, self.simpleCS), 8)
+        self.assertEqual(getCumulativeNodeNum(1, 2, self.simpleCS), 6)
 
-        self.assertEqual(getCumulativeNodeNum(2, 0, self.standaloneDetailedCS), 10)
-        self.assertEqual(getCumulativeNodeNum(1, 0, self.standaloneDetailedCS), 4)
+        self.assertEqual(getCumulativeNodeNum(2, 0, self.detailedCS), 10)
+        self.assertEqual(getCumulativeNodeNum(1, 0, self.detailedCS), 4)
 
 
 if __name__ == "__main__":
