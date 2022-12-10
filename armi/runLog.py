@@ -17,7 +17,7 @@ This module handles logging of console output (e.g. warnings, information, error
 during an armi run.
 
 The default way of calling and the global armi logger is to just import it:
-TESTING
+TESTING 2
 .. code::
 
     from armi import runLog
