@@ -21,21 +21,12 @@ jobs:
         run: sudo apt-get update
       - name: Install mpi libs
         run: sudo apt-get -y install libopenmpi-dev
-#      - name: Install Tox and any other packages
-#        run: pip install tox
-#      - name: Run Coverage Part 1
-#        run: tox -e cov1 || true
+      - name: Install Tox and any other packages
+        run: pip install tox
+      - name: Run Coverage Part 1
+        run: tox -e cov1 || true
       - name: Run Coverage Part 2
-        run: |
-          pip install pip>=20.2
-          pip install mpi4py
-          pip install -r requirements.txt
-          pip install -r requirements-testing.txt
-          pip install -e .
-          pip install pytest
-          pip install codecov
-          coverage run --rcfile=.coveragerc -m pytest -n 4 --cov=armi --cov-config=.coveragerc --ignore=armi/utils/tests/test_gridGui.py --ignore=venv armi/tests/test_runLog.py
-          coverage xml
+        run: tox -e cov2
       - name: Upload Coverage Part 3
         run: |
           curl -Os https://uploader.codecov.io/latest/linux/codecov
