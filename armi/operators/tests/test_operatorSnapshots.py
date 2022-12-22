@@ -17,6 +17,7 @@
 import unittest
 
 from armi.bookkeeping.db.databaseInterface import DatabaseInterface
+from armi.operators import RunTypes
 from armi.operators.snapshots import OperatorSnapshots
 from armi.reactor.tests import test_reactors
 from armi.settings.fwSettings.databaseSettings import CONF_FORCE_DB_PARAMS
@@ -43,17 +44,37 @@ class TestOperatorSnapshots(unittest.TestCase):
     def test_atEOL(self):
         self.assertFalse(self.o.atEOL)
 
+    def test_mainOperateHalting(self):
+        # Mock some unimportant tooling
+        self.o.interactBOL = lambda: None
+        self.o.getInterface = (
+            lambda s: self.dbi if s == "database" else super().getInterface(s)
+        )
+        # halting snapshot
+        self.o.interactAllBOC = lambda c: True
+
+        self.assertEqual(self.r.core.p.power, 0.0)
+        self.o._mainOperate()
+        self.assertEqual(self.r.core.p.power, 100000000.0)
+
     def test_mainOperate(self):
         # Mock some unimportant tooling
         self.o.interactBOL = lambda: None
         self.o.getInterface = (
             lambda s: self.dbi if s == "database" else super().getInterface(s)
         )
-        self.o.interactAllBOC = lambda c: True
+        # non-halting snapshot
+        self.o.interactAllBOC = lambda c: False
 
         self.assertEqual(self.r.core.p.power, 0.0)
         self.o._mainOperate()
         self.assertEqual(self.r.core.p.power, 100000000.0)
+
+    def test_setStateToDefault(self):
+        cs = self.o.cs
+        cs["runType"] = RunTypes.EQUILIBRIUM
+        cs1 = OperatorSnapshots.setStateToDefault(cs)
+        self.assertEqual(cs1["runType"], RunTypes.STANDARD)
 
 
 if __name__ == "__main__":
