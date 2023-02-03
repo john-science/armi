@@ -791,6 +791,15 @@ class LeadBismuth_TestCase(_Material_Test, unittest.TestCase):
         self.assertGreater(len(self.mat.propertyValidTemperature), 0)
 
 
+class Copper_TestCase(_Material_Test, unittest.TestCase):
+    MAT_CLASS = materials.Cu
+
+    def test_densityNeverChanges(self):
+        for tk in [200.0, 400.0, 800.0, 1111.1]:
+            cur = self.mat.density3(tk)
+            self.assertAlmostEqual(cur, 8.913, 4)
+
+
 class Sulfur_TestCase(_Material_Test, unittest.TestCase):
     MAT_CLASS = materials.Sulfur
 
